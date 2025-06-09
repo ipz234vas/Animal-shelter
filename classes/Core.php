@@ -6,14 +6,21 @@ use ReflectionMethod;
 
 class Core
 {
+    public string $defaultLayoutPath = 'layout/index.php';
     private static ?self $instance = null;
     protected Template $mainTemplate;
     public string $module;
     public string $action;
+    public DB $db;
 
     private function __construct()
     {
-        $this->mainTemplate = new Template('layout/index.php');
+        $this->mainTemplate = new Template($this->defaultLayoutPath);
+        $host = Config::getInstance()->dbHost;
+        $name = Config::getInstance()->dbName;
+        $login = Config::getInstance()->dbLogin;
+        $password = Config::getInstance()->dbPassword;
+        $this->db = new DB($host, $name, $login, $password);
     }
 
     public static function getInstance(): self
