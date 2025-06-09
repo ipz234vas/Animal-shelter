@@ -45,8 +45,7 @@ class Model
 
     public function save(): bool
     {
-        $value = $this->{static::$primaryKey};
-        if (empty($value)) {
+        if ($this->isInsert()) {
             $updatedRows = self::asQuery()->insert($this->fieldsArray)->execute();
         } else {
             $updatedRows =
@@ -56,6 +55,20 @@ class Model
                     ->execute();
         }
         return !!$updatedRows;
+    }
+
+    private function isInsert(): bool
+    {
+        if (!isset($this->{static::$primaryKey})) {
+            return true;
+        }
+
+        $value = $this->{static::$primaryKey};
+        if (!empty($value)) {
+            return true;
+        }
+
+        return false;
     }
 
     public static function asQuery(): TableBuilder
