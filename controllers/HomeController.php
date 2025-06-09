@@ -3,14 +3,13 @@
 namespace controllers;
 
 use classes\Controller;
+use models\User;
 
 class HomeController extends Controller
 {
-    public function indexAction(?int $number): array
+    public function indexAction(): array
     {
-        return $this->view('Index action', [
-            'number' => $number,
-        ]);
+        return $this->view('Index action');
     }
 
     public function addAction(?int $number): array

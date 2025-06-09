@@ -2,6 +2,7 @@
 
 namespace classes;
 
+use classes\database\DB;
 use ReflectionMethod;
 
 class Core

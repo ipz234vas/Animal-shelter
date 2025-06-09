@@ -1,1 +1,1 @@
-<div><?= $number ?></div>
+<div>Index</div>
