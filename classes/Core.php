@@ -6,7 +6,7 @@ use ReflectionMethod;
 
 class Core
 {
-    private static $instance = null;
+    private static ?self $instance = null;
     protected Template $mainTemplate;
     public string $module;
     public string $action;
@@ -32,10 +32,19 @@ class Core
 
     public function run(): void
     {
-        $route = $_GET['route'];
-        $route_parts = explode('/', $route);
-        $this->module = $route_parts[0];
-        $this->action = $route_parts[1];
+        if (isset($_GET['route'])) {
+            $route = $_GET['route'];
+            $route_parts = explode('/', $route);
+            $this->module = $route_parts[0];
+            if (isset($route_parts[1]))
+                $this->action = $route_parts[1];
+            else {
+                $this->action = 'index';
+            }
+        } else {
+            $this->module = 'home';
+            $this->action = 'index';
+        }
         $class_name = "controllers\\" . ucfirst($this->module) . 'Controller';
         if (!class_exists($class_name)) {
             $this->error(404);
@@ -67,7 +76,7 @@ class Core
         $this->mainTemplate->addParams($data);
     }
 
-    public function done()
+    public function done(): void
     {
         $this->mainTemplate->display();
     }
