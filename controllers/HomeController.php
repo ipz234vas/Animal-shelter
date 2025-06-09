@@ -2,16 +2,14 @@
 
 namespace controllers;
 
-use classes\Template;
+use classes\Controller;
 
-class HomeController
+class HomeController extends Controller
 {
-    public function addAction()
+    public function addAction(?int $number)
     {
-        $tpl = new Template('views/home/add.php');
-        return [
-            'Title' => "Головна сторінка",
-            'Content' => $tpl->render()
-        ];
+        return $this->view('Add action', [
+            'number' => $number,
+        ]);
     }
 }

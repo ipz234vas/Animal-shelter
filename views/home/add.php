@@ -1,1 +1,1 @@
-<div>ADD !!!!</div>
+<div><?= $number ?></div>
