@@ -1,5 +1,5 @@
 <div>
-    <input type="number" id="numberInput" value="42" />
+    <input type="number" id="numberInput" value="42"/>
     <button id="sendBtn">Відправити</button>
 </div>
 <div id="result"></div>
@@ -11,9 +11,9 @@
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json' // важливо для API
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ number })      // параметр number
+            body: JSON.stringify({number})
         })
             .then(r => r.json())
             .then(data => {
