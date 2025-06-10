@@ -16,6 +16,7 @@ class Core
     private ErrorHandler $errors;
     private Router $router;
     public DB $db;
+    public Session $session;
     public string $module;
     public string $action;
 
@@ -38,6 +39,7 @@ class Core
         $this->errors->setLoginPath($cng->loginPath);
         $this->template = new Template($cng->layoutPath);
         $this->db = new DB($cng->dbHost, $cng->dbName, $cng->dbLogin, $cng->dbPassword);
+        $this->session = new Session();
         $this->argumentResolver = new ArgumentResolver();
         $this->router = new Router($cng->defaultModule, $cng->defaultAction);
     }

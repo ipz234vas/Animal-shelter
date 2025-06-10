@@ -22,4 +22,23 @@ class Controller
             'Content' => $this->template->render()
         ];
     }
+
+    function redirect(string $controller = '', string $action = '', array $params = []): void
+    {
+        $path = '/';
+
+        if (!empty($controller)) {
+            $path .= $controller;
+            if (!empty($action)) {
+                $path .= '/' . $action;
+            }
+        }
+
+        if (!empty($params)) {
+            $path .= '?' . http_build_query($params);
+        }
+
+        header("Location: $path");
+        exit;
+    }
 }
