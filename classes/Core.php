@@ -3,6 +3,9 @@
 namespace classes;
 
 use classes\database\DB;
+use classes\exceptions\HttpException;
+use ErrorException;
+use ReflectionException;
 use ReflectionMethod;
 
 class Core
@@ -36,8 +39,16 @@ class Core
     public function init(): void
     {
         session_start();
+
+        set_exception_handler([$this, 'handleException']);
+        set_error_handler([$this, 'handleError']);
+        register_shutdown_function([$this, 'handleShutdown']);
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws HttpException
+     */
     public function run(): void
     {
         if (isset($_GET['route'])) {
@@ -89,9 +100,75 @@ class Core
         $this->template->display();
     }
 
-    public function error(int $code): void
+    /**
+     * @throws HttpException
+     */
+    public function error(int $code, ?string $message = ""): void
     {
+        throw new HttpException($code, $message);
+    }
+
+    public function handleException(\Throwable $e): void
+    {
+        if ($e instanceof HttpException) {
+            $this->handleHttpException($e);
+        } else {
+            $this->handleHttpException(new HttpException(500, 'Internal Server Error'));
+        }
+    }
+
+    /**
+     * @throws ErrorException
+     */
+    public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
+    {
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    }
+
+    public function handleShutdown(): void
+    {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+            $this->handleHttpException(new HttpException(500, 'Fatal error'));
+        }
+    }
+
+    public function handleHttpException(HttpException $e): void
+    {
+        ob_clean();
+
+        $code = $e->getCode();
         http_response_code($code);
-        die;
+
+        if ($code === 401 && !$this->isApiRequest()) {
+            $redirectTo = '/?route=auth/login';
+            $currentUrl = $_SERVER['REQUEST_URI'] ?? '/';
+            header("Location: $redirectTo&next=" . urlencode($currentUrl));
+            exit;
+        }
+
+        if ($this->isApiRequest()) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error' => $e->getMessage(),
+                'code' => $code
+            ]);
+            exit;
+        }
+
+        $view = __DIR__ . "/../views/errors/{$code}.php";
+        if (file_exists($view)) {
+            include $view;
+        } else {
+            echo "<h1>$code</h1><p>{$e->getMessage()}</p>";
+        }
+
+        exit;
+    }
+
+    private function isApiRequest(): bool
+    {
+        return isset($_SERVER['HTTP_X_API_REQUEST']) ||
+            str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
     }
 }

@@ -12,7 +12,7 @@ class HomeController extends Controller
         return $this->view();
     }
 
-    public function addAction(?int $number): array
+    public function addAction(int $number): array
     {
         return $this->view([
             'number' => $number,
