@@ -1,6 +1,6 @@
 <?php
 
-use classes\Core;
+use classes\App;
 
 spl_autoload_register(function ($class) {
     $path = str_replace('\\', '/', $class) . '.php';
@@ -9,7 +9,5 @@ spl_autoload_register(function ($class) {
     }
 });
 
-$core = Core::getInstance();
-$core->init();
-$core->run();
-$core->done();
+$app = new App();
+$app->run();
