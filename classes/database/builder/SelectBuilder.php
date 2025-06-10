@@ -2,7 +2,7 @@
 
 namespace classes\database\builder;
 
-use classes\database\SQLOrderDirection;
+use enums\database\SQLOrderDirection;
 
 class SelectBuilder extends BaseBuilder
 {

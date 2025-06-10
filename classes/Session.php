@@ -18,7 +18,7 @@ class Session
 
     public function get($name): ?string
     {
-        return $_SESSION[$name] || null;
+        return $_SESSION[$name] ?? null;
     }
 
     public function remove($name): void

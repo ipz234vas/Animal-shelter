@@ -3,7 +3,7 @@
 namespace classes\database\builder;
 
 use classes\database\QueryState;
-use classes\database\SQLOperator;
+use enums\database\SQLOperator;
 
 abstract class BaseBuilder
 {

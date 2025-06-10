@@ -49,7 +49,7 @@ final class ErrorHandler
             || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
         if ($code === 401 && !empty($this->loginPath) && !$isApi) {
-            $login = $this->loginPath . '&next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
+            $login = $this->loginPath . '?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
             header("Location: $login");
             exit;
         }

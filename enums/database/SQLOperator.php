@@ -1,6 +1,6 @@
 <?php
 
-namespace classes\database;
+namespace enums\database;
 
 enum SQLOperator: string
 {

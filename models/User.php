@@ -3,6 +3,7 @@
 namespace models;
 
 use classes\Core;
+use enums\database\SQLOperator;
 
 /**
  * @property int $id
@@ -28,5 +29,11 @@ class User extends Model
     public static function logout(): void
     {
         Core::getInstance()->session->remove("user_id");
+    }
+
+    public static function getPermissionsById(int $id): ?string
+    {
+        $row = User::asQuery()->select(["permissions"])->where(static::$primaryKey, SQLOperator::Equal, $id)->first();
+        return $row["permissions"] ?? null;
     }
 }

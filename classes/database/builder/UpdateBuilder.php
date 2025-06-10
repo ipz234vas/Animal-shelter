@@ -12,21 +12,22 @@ class UpdateBuilder extends BaseBuilder
 
     public function execute(): int
     {
-        if (!$this->state->data) {
-            return 0;
-        }
-        if (!$this->state->where) {
+        if (!$this->state->data || !$this->state->where) {
             return 0;
         }
 
-        $setPairs = implode(', ', array_map(fn($f) => "$f = :u_$f", array_keys($this->state->data)));
+        $setPairs = implode(', ', array_map(fn($f) => "$f = ?", array_keys($this->state->data)));
+
         $sql = "UPDATE {$this->state->table} SET $setPairs" . $this->buildWhereClause();
 
         $stmt = $this->state->pdo->prepare($sql);
-        foreach ($this->state->data as $k => $v) {
-            $stmt->bindValue(":u_$k", $v);
+
+        $params = array_values($this->state->data);
+        if (!empty($this->state->params)) {
+            $params = array_merge($params, array_values($this->state->params));
         }
-        $stmt->execute($this->state->params);
+
+        $stmt->execute($params);
 
         return $stmt->rowCount();
     }

@@ -4,7 +4,7 @@ namespace models;
 
 use classes\Core;
 use classes\database\builder\TableBuilder;
-use classes\database\SQLOperator;
+use enums\database\SQLOperator;
 
 class Model
 {
@@ -59,16 +59,15 @@ class Model
 
     private function isInsert(): bool
     {
-        if (!isset($this->{static::$primaryKey})) {
+        $key = static::$primaryKey;
+
+        if (!array_key_exists($key, $this->fieldsArray)) {
             return true;
         }
 
-        $value = $this->{static::$primaryKey};
-        if (!empty($value)) {
-            return true;
-        }
+        $value = $this->fieldsArray[$key];
 
-        return false;
+        return empty($value);
     }
 
     public static function asQuery(): TableBuilder

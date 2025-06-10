@@ -1,14 +1,14 @@
 <?php
 
-namespace classes\attributes;
+namespace classes\attributes\routing;
 
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
-class Post extends Route
+class Get extends Route
 {
     public function __construct(string $action)
     {
-        parent::__construct("POST", $action);
+        parent::__construct("GET", $action);
     }
 }

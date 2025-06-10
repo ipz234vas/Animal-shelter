@@ -2,20 +2,23 @@
 
 namespace classes;
 
-use classes\attributes\Route;
+use classes\attributes\auth\Authorize;
+use classes\attributes\routing\Route;
 use classes\database\DB;
 use classes\exceptions\HttpException;
+use models\User;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 
 class Core
 {
     private static ?self $instance = null;
 
-    private Template $template;
     private ArgumentResolver $argumentResolver;
     private ErrorHandler $errors;
     private Router $router;
+    public Template $template;
     public DB $db;
     public Session $session;
     public string $module;
@@ -34,6 +37,7 @@ class Core
     {
         session_start();
 
+        $this->errors = new ErrorHandler();
         $this->useErrorHandler();
 
         $cng = Config::getInstance();
@@ -60,10 +64,11 @@ class Core
         }
 
         $controller = new $controllerClass();
+        $reflection = new ReflectionClass($controller);
 
         $matchedMethod = null;
 
-        foreach ((new ReflectionClass($controller))->getMethods() as $method) {
+        foreach ($reflection->getMethods() as $method) {
             foreach ($method->getAttributes() as $attr) {
                 $instance = $attr->newInstance();
                 if ($instance instanceof Route) {
@@ -79,12 +84,51 @@ class Core
             throw new HttpException(404, "No matching route for action '{$this->action}' and method '$httpMethod'");
         }
 
+        $this->handleAuthorization($reflection, $matchedMethod);
+
         $args = $this->argumentResolver->resolve($matchedMethod, $_REQUEST);
         $data = $matchedMethod->invoke($controller, ...$args);
 
         $this->template->addParams($data);
     }
 
+    /**
+     * @throws HttpException
+     */
+    private function handleAuthorization(ReflectionClass $controller, ReflectionMethod $method): void
+    {
+        /** @var Authorize[] $authAttributes */
+        $authAttributes = [];
+
+        foreach ($controller->getAttributes(Authorize::class) as $attr) {
+            $authAttributes[] = $attr->newInstance();
+        }
+        foreach ($method->getAttributes(Authorize::class) as $attr) {
+            $authAttributes[] = $attr->newInstance();
+        }
+
+        if (empty($authAttributes)) {
+            return;
+        }
+
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            throw new HttpException(401);
+        }
+
+        $userPermissionsStr = User::getPermissionsById($userId) ?? "";
+        $userPermissions = PermissionParser::fromString($userPermissionsStr);
+
+        foreach ($authAttributes as $authorize) {
+            if (!$authorize->isLoginOnly()) {
+                foreach ($authorize->permissions as $permission) {
+                    if (!in_array($permission, $userPermissions, true)) {
+                        throw new HttpException(403);
+                    }
+                }
+            }
+        }
+    }
 
     public function done(): void
     {
@@ -93,7 +137,6 @@ class Core
 
     private function useErrorHandler(): void
     {
-        $this->errors = new ErrorHandler();
         set_exception_handler($this->errors->handle(...));
         set_error_handler($this->errors->convertErrorToException(...));
         register_shutdown_function($this->errors->handleShutdown(...));
