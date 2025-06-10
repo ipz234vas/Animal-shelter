@@ -12,11 +12,12 @@ class Core
     private static ?self $instance = null;
 
     private Template $template;
+    private ArgumentResolver $argumentResolver;
+    private ErrorHandler $errors;
+    private Router $router;
     public DB $db;
     public string $module;
     public string $action;
-    private ArgumentResolver $argumentResolver;
-    private Router $router;
 
     private function __construct()
     {
@@ -34,6 +35,7 @@ class Core
         $this->useErrorHandler();
 
         $cng = Config::getInstance();
+        $this->errors->setLoginPath($cng->loginPath);
         $this->template = new Template($cng->layoutPath);
         $this->db = new DB($cng->dbHost, $cng->dbName, $cng->dbLogin, $cng->dbPassword);
         $this->argumentResolver = new ArgumentResolver();
@@ -74,9 +76,9 @@ class Core
 
     private function useErrorHandler(): void
     {
-        $errors = new ErrorHandler();
-        set_exception_handler($errors->handle(...));
-        set_error_handler($errors->convertErrorToException(...));
-        register_shutdown_function($errors->handleShutdown(...));
+        $this->errors = new ErrorHandler();
+        set_exception_handler($this->errors->handle(...));
+        set_error_handler($this->errors->convertErrorToException(...));
+        register_shutdown_function($this->errors->handleShutdown(...));
     }
 }

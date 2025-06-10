@@ -8,6 +8,13 @@ use ErrorException;
 
 final class ErrorHandler
 {
+    private string $loginPath = '';
+
+    public function setLoginPath(string $path): void
+    {
+        $this->loginPath = $path;
+    }
+
     public function handle(Throwable $e): void
     {
         if (!$e instanceof HttpException) {
@@ -41,8 +48,8 @@ final class ErrorHandler
         $isApi = isset($_SERVER['HTTP_X_API_REQUEST'])
             || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
-        if ($code === 401 && !$isApi) {
-            $login = '/?route=auth/login&next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
+        if ($code === 401 && !empty($this->loginPath) && !$isApi) {
+            $login = $this->loginPath . '&next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
             header("Location: $login");
             exit;
         }
