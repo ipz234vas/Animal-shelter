@@ -36,4 +36,20 @@ class User extends Model
         $row = User::asQuery()->select(["permissions"])->where(static::$primaryKey, SQLOperator::Equal, $id)->first();
         return $row["permissions"] ?? null;
     }
+
+    public static function getByEmail(string $email): ?array
+    {
+        $row = User::asQuery()->select()->where("email", SQLOperator::Equal, $email)->first();
+        return $row ?? null;
+    }
+
+    public static function checkPassword(string $password, string $password_hash): bool
+    {
+        return password_verify($password, $password_hash);
+    }
+
+    public static function hashPassword(string $password): string
+    {
+        return password_hash($password, PASSWORD_DEFAULT);
+    }
 }

@@ -7,7 +7,7 @@
 <script>
     document.getElementById('sendBtn').addEventListener('click', function () {
         const number = document.getElementById('numberInput').value;
-        fetch('/test/index', {
+        fetch('/test/test', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

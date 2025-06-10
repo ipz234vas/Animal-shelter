@@ -1,5 +1,6 @@
 <?php
-$this->Title = "Login"
+$this->Title = "Login";
+$errs = $errors ?? [];
 ?>
 
 <style>
@@ -45,7 +46,7 @@ $this->Title = "Login"
         background-color: #0056b3;
     }
 
-    .error-message {
+    .error {
         color: red;
         margin-bottom: 15px;
     }
@@ -54,19 +55,21 @@ $this->Title = "Login"
 
 <h1>Вхід до системи</h1>
 
-<?php if (!empty($Test)): ?>
-    <p class="error-message"><?= htmlspecialchars($Test) ?></p>
-<?php endif; ?>
-
 <form action="/users/login" method="post">
-    <input name="next" type="hidden" value="<?= $next ?>"/>
+    <input name="next" type="hidden" value="<?= $next ?? "" ?>"/>
     <div>
         <label for="email">Електронна пошта:</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" required value="<?= $model->email ?? "" ?>">
+        <?php if (!empty($errs['email'])): ?>
+            <div class="error"><?= implode(', ', $errs['email']) ?></div>
+        <?php endif; ?>
     </div>
     <div>
         <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password" required value="<?= $model->password ?? "" ?>">
+        <?php if (!empty($errs['password'])): ?>
+            <div class="error"><?= implode(', ', $errs['password']) ?></div>
+        <?php endif; ?>
     </div>
     <button type="submit">Увійти</button>
 </form>

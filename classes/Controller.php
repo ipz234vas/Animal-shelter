@@ -2,7 +2,7 @@
 
 namespace classes;
 
-class Controller
+class Controller extends BaseController
 {
     public Template $template;
 
@@ -11,6 +11,7 @@ class Controller
         $module = Core::getInstance()->module;
         $action = Core::getInstance()->action;
         $this->template = new Template("views/{$module}/{$action}.php");
+        parent::__construct();
     }
 
     function view(array $params = []): array

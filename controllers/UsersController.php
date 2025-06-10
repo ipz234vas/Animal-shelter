@@ -5,10 +5,23 @@ namespace controllers;
 use attributes\routing\Get;
 use attributes\routing\Post;
 use classes\Controller;
+use dto\LoginDto;
 use models\User;
 
 class UsersController extends Controller
 {
+    #[Get("index")]
+    public function index(): void
+    {
+        $user = new User();
+        $user->email = "main_test@gmail.com";
+        $user->permissions = "";
+        $user->full_name = "Main Test";
+        $user->password_hash = User::hashPassword("main_test");
+        $user->save();
+        $this->redirect("home");
+    }
+
     #[Get("logout")]
     public function logout(): void
     {
@@ -17,29 +30,45 @@ class UsersController extends Controller
     }
 
     #[Get("login")]
-    public function login($next = ""): array
+    public function login(string $next = ""): array
     {
-        if (User::isUserLoggedIn())
+        if (User::isUserLoggedIn()) {
             $this->redirect();
+        }
         return $this->view([
-            "next" => $next
+            "next" => $next,
+            "model" => new LoginDto()
         ]);
     }
 
     #[Post("login")]
-    public function handleLogin($next): array
+    public function handleLogin(LoginDto $model, string $next = ''): array
     {
-        $row = User::getById(1);
-        $user = new User();
-        $user->id = $row["id"];
-        User::login($user);
-        $next = base64_decode($next ?? '');
-        if ($next)
-            $this->redirectToPath($next);
-        else $this->redirect();
+        if (!$this->modelState->isValid()) {
+            return $this->view([
+                "model" => $model,
+                "errors" => $this->modelState->all(),
+                "next" => $next
+            ]);
+        }
 
-        return $this->view([
-            'Test' => "ВИЙШЛО!"
-        ]);
+        $userRow = User::getByEmail($model->email);
+        if (!$userRow || !User::checkPassword($model->password, $userRow['password_hash'])) {
+            $this->modelState->add('password', 'Невірний email або пароль');
+            return $this->view([
+                "model" => $model,
+                "errors" => $this->modelState->all(),
+                "next" => $next
+            ]);
+        }
+
+        $user = new User();
+        $user->id = $userRow['id'];
+        User::login($user);
+
+        $nextUrl = $next ? base64_decode($next) : '/';
+        $this->redirectToPath($nextUrl);
+
+        return [];
     }
 }

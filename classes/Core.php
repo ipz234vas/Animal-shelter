@@ -6,6 +6,7 @@ use attributes\auth\Authorize;
 use attributes\routing\Route;
 use classes\database\DB;
 use classes\exceptions\HttpException;
+use JsonException;
 use models\User;
 use ReflectionClass;
 use ReflectionException;
@@ -45,13 +46,14 @@ class Core
         $this->template = new Template($cng->layoutPath);
         $this->db = new DB($cng->dbHost, $cng->dbName, $cng->dbLogin, $cng->dbPassword);
         $this->session = new Session();
-        $this->argumentResolver = new ArgumentResolver();
+        $this->argumentResolver = new ArgumentResolver(new ModelBinder());
         $this->router = new Router($cng->defaultModule, $cng->defaultAction);
     }
 
     /**
      * @throws ReflectionException
      * @throws HttpException
+     * @throws JsonException
      */
     public function run(): void
     {
@@ -106,7 +108,9 @@ class Core
                 }
             }
         }
-        $args = $this->argumentResolver->resolve($matchedMethod, $params);
+
+        $modelState = $controller->modelState;
+        $args = $this->argumentResolver->resolve($matchedMethod, $params, $modelState);
         $data = $matchedMethod->invoke($controller, ...$args);
 
         if ($isApi) {

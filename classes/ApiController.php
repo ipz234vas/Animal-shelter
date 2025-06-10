@@ -2,7 +2,7 @@
 
 namespace classes;
 
-abstract class ApiController
+abstract class ApiController extends BaseController
 {
     protected function json(mixed $data = null, int $status = 200): never
     {
