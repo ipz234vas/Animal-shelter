@@ -51,7 +51,7 @@ class Model
             $updatedRows =
                 self::asQuery()
                     ->update($this->fieldsArray)
-                    ->where(static::$primaryKey, SQLOperator::Equal, $value)
+                    ->where(static::$primaryKey, SQLOperator::Equal, $this->{static::$primaryKey})
                     ->execute();
         }
         return !!$updatedRows;

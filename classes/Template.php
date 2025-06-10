@@ -13,6 +13,16 @@ class Template
         $this->template_filepath = $filepath;
     }
 
+    public function __set(string $name, $value)
+    {
+        Core::getInstance()->template->addParam($name, $value);
+    }
+
+    public function setTemplateFilepath(string $filepath): void
+    {
+        $this->template_filepath = $filepath;
+    }
+
     public function addParam(string $name, string $value): void
     {
         $this->params[$name] = $value;
@@ -21,16 +31,6 @@ class Template
     public function addParams(array $params): void
     {
         $this->params = array_merge($this->params, $params);
-    }
-
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    public function getParam(string $name): string
-    {
-        return $this->params[$name];
     }
 
     public function render(): string

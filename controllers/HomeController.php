@@ -9,12 +9,12 @@ class HomeController extends Controller
 {
     public function indexAction(): array
     {
-        return $this->view('Index action');
+        return $this->view();
     }
 
     public function addAction(?int $number): array
     {
-        return $this->view('Add action', [
+        return $this->view([
             'number' => $number,
         ]);
     }

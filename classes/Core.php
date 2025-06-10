@@ -9,14 +9,14 @@ class Core
 {
     public string $defaultLayoutPath = 'layout/index.php';
     private static ?self $instance = null;
-    protected Template $mainTemplate;
+    public Template $template;
     public string $module;
     public string $action;
     public DB $db;
 
     private function __construct()
     {
-        $this->mainTemplate = new Template($this->defaultLayoutPath);
+        $this->template = new Template($this->defaultLayoutPath);
         $host = Config::getInstance()->dbHost;
         $name = Config::getInstance()->dbName;
         $login = Config::getInstance()->dbLogin;
@@ -81,12 +81,12 @@ class Core
         }
 
         $data = $controller->$method(...$args);
-        $this->mainTemplate->addParams($data);
+        $this->template->addParams($data);
     }
 
     public function done(): void
     {
-        $this->mainTemplate->display();
+        $this->template->display();
     }
 
     public function error(int $code): void
