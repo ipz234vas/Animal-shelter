@@ -37,7 +37,11 @@ class Controller
         if (!empty($params)) {
             $path .= '?' . http_build_query($params);
         }
+        $this->redirectToPath($path);
+    }
 
+    function redirectToPath($path): void
+    {
         header("Location: $path");
         exit;
     }

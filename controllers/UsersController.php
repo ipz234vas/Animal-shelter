@@ -2,8 +2,8 @@
 
 namespace controllers;
 
-use classes\attributes\routing\Get;
-use classes\attributes\routing\Post;
+use attributes\routing\Get;
+use attributes\routing\Post;
 use classes\Controller;
 use models\User;
 
@@ -17,21 +17,27 @@ class UsersController extends Controller
     }
 
     #[Get("login")]
-    public function login(): array
+    public function login($next = ""): array
     {
         if (User::isUserLoggedIn())
             $this->redirect();
-        return $this->view();
+        return $this->view([
+            "next" => $next
+        ]);
     }
 
     #[Post("login")]
-    public function handleLogin(): array
+    public function handleLogin($next): array
     {
         $row = User::getById(1);
         $user = new User();
         $user->id = $row["id"];
         User::login($user);
-        $this->redirect();
+        $next = base64_decode($next ?? '');
+        if ($next)
+            $this->redirectToPath($next);
+        else $this->redirect();
+
         return $this->view([
             'Test' => "ВИЙШЛО!"
         ]);

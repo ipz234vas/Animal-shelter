@@ -1,6 +1,6 @@
 <?php
 
-namespace classes\attributes\auth;
+namespace attributes\auth;
 
 use Attribute;
 use enums\auth\Permission;

@@ -59,6 +59,7 @@ $this->Title = "Login"
 <?php endif; ?>
 
 <form action="/users/login" method="post">
+    <input name="next" type="hidden" value="<?= $next ?>"/>
     <div>
         <label for="email">Електронна пошта:</label>
         <input type="email" id="email" name="email" required>

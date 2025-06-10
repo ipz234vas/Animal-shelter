@@ -2,8 +2,8 @@
 
 namespace classes;
 
-use classes\attributes\auth\Authorize;
-use classes\attributes\routing\Route;
+use attributes\auth\Authorize;
+use attributes\routing\Route;
 use classes\database\DB;
 use classes\exceptions\HttpException;
 use models\User;

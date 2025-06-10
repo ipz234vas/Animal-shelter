@@ -2,8 +2,8 @@
 
 namespace controllers;
 
-use classes\attributes\auth\Authorize;
-use classes\attributes\routing\Get;
+use attributes\auth\Authorize;
+use attributes\routing\Get;
 use classes\Controller;
 use classes\PermissionParser;
 use enums\auth\Permission;
