@@ -2,10 +2,11 @@
 
 namespace classes;
 
+use classes\attributes\Route;
 use classes\database\DB;
 use classes\exceptions\HttpException;
+use ReflectionClass;
 use ReflectionException;
-use ReflectionMethod;
 
 class Core
 {
@@ -51,6 +52,7 @@ class Core
     public function run(): void
     {
         [$this->module, $this->action] = $this->router->parse($_GET['route'] ?? '');
+        $httpMethod = $_SERVER['REQUEST_METHOD'];
 
         $controllerClass = "controllers\\" . ucfirst($this->module) . 'Controller';
         if (!class_exists($controllerClass)) {
@@ -58,18 +60,31 @@ class Core
         }
 
         $controller = new $controllerClass();
-        $method = $this->action . "Action";
 
-        if (!method_exists($controller, $method)) {
-            throw new HttpException(404);
+        $matchedMethod = null;
+
+        foreach ((new ReflectionClass($controller))->getMethods() as $method) {
+            foreach ($method->getAttributes() as $attr) {
+                $instance = $attr->newInstance();
+                if ($instance instanceof Route) {
+                    if ($instance->method === $httpMethod && $instance->action === $this->action) {
+                        $matchedMethod = $method;
+                        break 2;
+                    }
+                }
+            }
         }
 
-        $ref = new ReflectionMethod($controller, $method);
-        $args = $this->argumentResolver->resolve($ref, $_GET);
-        $data = $controller->$method(...$args);
+        if (!$matchedMethod) {
+            throw new HttpException(404, "No matching route for action '{$this->action}' and method '$httpMethod'");
+        }
+
+        $args = $this->argumentResolver->resolve($matchedMethod, $_REQUEST);
+        $data = $matchedMethod->invoke($controller, ...$args);
 
         $this->template->addParams($data);
     }
+
 
     public function done(): void
     {

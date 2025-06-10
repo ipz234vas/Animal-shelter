@@ -2,17 +2,20 @@
 
 namespace controllers;
 
+use classes\attributes\Get;
+use classes\attributes\Post;
 use classes\Controller;
-use models\User;
 
 class HomeController extends Controller
 {
-    public function indexAction(): array
+    #[Get('index')]
+    public function index(): array
     {
         return $this->view();
     }
 
-    public function addAction(int $number): array
+    #[Post('add')]
+    public function add(int $number): array
     {
         return $this->view([
             'number' => $number,
