@@ -58,7 +58,16 @@ class Core
         [$this->module, $this->action] = $this->router->parse($_GET['route'] ?? '');
         $httpMethod = $_SERVER['REQUEST_METHOD'];
 
-        $controllerClass = "controllers\\" . ucfirst($this->module) . 'Controller';
+        $isApi = $this->isApiRequest();
+
+        [$this->module, $this->action] = $this->router->parse($_GET['route'] ?? '');
+
+        if ($isApi) {
+            $controllerClass = "controllers\\api\\" . ucfirst($this->module) . 'ApiController';
+        } else {
+            $controllerClass = "controllers\\" . ucfirst($this->module) . 'Controller';
+        }
+
         if (!class_exists($controllerClass)) {
             throw new HttpException(404);
         }
@@ -86,8 +95,27 @@ class Core
 
         $this->handleAuthorization($reflection, $matchedMethod);
 
-        $args = $this->argumentResolver->resolve($matchedMethod, $_REQUEST);
+        $params = $_REQUEST;
+        if ($isApi && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+            if (str_starts_with($contentType, 'application/json')) {
+                $raw = file_get_contents('php://input');
+                $json = json_decode($raw, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+                    $params = array_merge($params, $json);
+                }
+            }
+        }
+        $args = $this->argumentResolver->resolve($matchedMethod, $params);
         $data = $matchedMethod->invoke($controller, ...$args);
+
+        if ($isApi) {
+            if (!headers_sent()) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            }
+            return;
+        }
 
         $this->template->addParams($data);
     }
@@ -141,4 +169,14 @@ class Core
         set_error_handler($this->errors->convertErrorToException(...));
         register_shutdown_function($this->errors->handleShutdown(...));
     }
+
+    private function isApiRequest(): bool
+    {
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+        return str_contains($accept, 'application/json')
+            || str_contains($contentType, 'application/json');
+    }
+
 }
