@@ -7,6 +7,7 @@ use attributes\routing\Get;
 use attributes\routing\Post;
 use classes\Controller;
 use classes\database\builder\BaseBuilder;
+use classes\exceptions\HttpException;
 use dto\listRequests\UsersListRequest;
 use dto\pagination\PaginatedResult;
 use enums\auth\Permission;
@@ -57,6 +58,47 @@ class UsersController extends Controller
         ]);
     }
 
+    /**
+     * @throws HttpException
+     */
+    #[Get('edit')]
+    public function edit(int $id, ?string $next = null): array
+    {
+        $userRow = User::getById($id);
+        if (!$userRow) {
+            throw new HttpException(404);
+        }
+
+        return $this->view([
+            'user' => (object)$userRow,
+            'perms' => Permission::cases(),
+            'next' => $next ?? $_SERVER['HTTP_REFERER'] ?? '/users',
+        ]);
+    }
+
+    /**
+     * @throws HttpException
+     */
+    #[Post('edit')]
+    public function updatePermissions(int $id, ?array $permissions = [], ?string $next = null): array
+    {
+        $rows = User::getById($id);
+        if (!$rows) {
+            throw new HttpException(404);
+        }
+        $permissions_str = implode(' ', $permissions);
+        $user = new User();
+        $user->id = $rows["id"];
+        $user->permissions = $permissions_str;
+        $user->save();
+
+        $target = $next ?? "/users/";
+        $this->redirect("users", "edit", [
+            "next" => $target,
+            "id" => $id
+        ]);
+    }
+
     #[Post('delete')]
     public function delete(string $next, $id): array
     {
@@ -65,6 +107,7 @@ class UsersController extends Controller
         }
         User::deleteById($id);
 
-        $this->redirectToPath($next);
+        $nextUrl = $next ? base64_decode($next) : '/';
+        $this->redirectToPath($nextUrl);
     }
 }

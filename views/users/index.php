@@ -10,6 +10,8 @@ use enums\auth\Permission;
 
 $this->Title = "Користувачі";
 
+$next = base64_encode($_SERVER['REQUEST_URI'] ?? '/');
+
 require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 require_once dirname(__DIR__, 2) . '/app/helpers/pagination.php';
 require_once dirname(__DIR__, 2) . '/app/helpers/sort_link.php';
@@ -39,16 +41,15 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1 class="h4 mb-0">Користувачі</h1>
-            <a href="/users/create" class="btn btn-primary btn-sm">+ Додати</a>
         </div>
 
         <form method="GET" class="card shadow-sm border-0 rounded-3 p-3 mb-3">
             <div class="row gy-2">
-                <div class="col-md-4 d-flex gap-2">
+                <div class="col-xl-4 d-flex gap-2">
                     <input type="text" name="query" value="<?= htmlspecialchars($request->query ?? '') ?>"
                            class="form-control" placeholder="Пошук…">
 
-                    <select name="perPage" class="form-select w-auto" onchange="this.form.submit()">
+                    <select name="perPage" class="form-select w-auto">
                         <?php foreach (dto\listRequests\BaseListRequest::PER_PAGE_CHOICES as $size): ?>
                             <option value="<?= $size ?>" <?= $request->perPage == $size ? 'selected' : '' ?>>
                                 <?= $size ?>
@@ -57,7 +58,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                     </select>
                 </div>
 
-                <div class="col-md-5">
+                <div class="col-xl-6">
                     <?php foreach ($perms as $perm): ?>
                         <label class="me-2 small">
                             <input type="checkbox" name="permissions[]" value="<?= $perm->value ?>"
@@ -67,7 +68,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                     <?php endforeach; ?>
                 </div>
 
-                <div class="col-md-3 text-end">
+                <div class="col-xl-2 text-end d-flex align-items-center justify-content-end">
                     <button class="btn btn-outline-primary btn-sm">Застосувати</button>
                 </div>
             </div>
@@ -94,7 +95,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                             </td>
                             <td class="text-center py-3">
                                 <div class="d-flex justify-content-center gap-2">
-                                    <a href="/users/edit?id=<?= $user['id'] ?>"
+                                    <a href="/users/edit?id=<?= $user['id'] ?>&next=<?= $next ?>"
                                        class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
                                        title="Редагувати"><i class="bi bi-pencil"></i></a>
 
@@ -104,7 +105,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteConfirmationModal"
                                             data-id="<?= $user['id'] ?>"
-                                            data-next="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>"
+                                            data-next="<?= $next ?>"
                                             data-name="<?= htmlspecialchars($user['full_name']) ?>"
                                             data-action="/users/delete">
                                         <i class="bi bi-trash"></i>
