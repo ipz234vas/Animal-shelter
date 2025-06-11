@@ -1,7 +1,40 @@
 <?php
+/* @var UsersListRequest $request */
+/* @var Permission[] $perms */
+
+/* @var PaginatedResult $users */
+
+use dto\listRequests\UsersListRequest;
+use dto\pagination\PaginatedResult;
+use enums\auth\Permission;
+
 $this->Title = "Користувачі";
+
 require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
+require_once dirname(__DIR__, 2) . '/app/helpers/pagination.php';
+require_once dirname(__DIR__, 2) . '/app/helpers/sort_link.php';
+require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.php';
 ?>
+
+    <style>
+        .table-fixed {
+            table-layout: fixed;
+        }
+
+        .table-users td, .table-users th {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .table-users th:nth-child(1), .table-users td:nth-child(1) {
+            width: 40%;
+        }
+
+        .table-users th:nth-child(2), .table-users td:nth-child(2) {
+            width: 30%;
+        }
+    </style>
 
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -9,51 +42,62 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
             <a href="/users/create" class="btn btn-primary btn-sm">+ Додати</a>
         </div>
 
+        <form method="GET" class="card shadow-sm border-0 rounded-3 p-3 mb-3">
+            <div class="row gy-2">
+                <div class="col-md-4 d-flex gap-2">
+                    <input type="text" name="query" value="<?= htmlspecialchars($request->query ?? '') ?>"
+                           class="form-control" placeholder="Пошук…">
+
+                    <select name="perPage" class="form-select w-auto" onchange="this.form.submit()">
+                        <?php foreach (dto\listRequests\BaseListRequest::PER_PAGE_CHOICES as $size): ?>
+                            <option value="<?= $size ?>" <?= $request->perPage == $size ? 'selected' : '' ?>>
+                                <?= $size ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <?php foreach ($perms as $perm): ?>
+                        <label class="me-2 small">
+                            <input type="checkbox" name="permissions[]" value="<?= $perm->value ?>"
+                                <?= in_array($perm->value, (array)$request->permissions, true) ? 'checked' : '' ?>>
+                            <?= htmlspecialchars($perm->label()) ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="col-md-3 text-end">
+                    <button class="btn btn-outline-primary btn-sm">Застосувати</button>
+                </div>
+            </div>
+        </form>
+
         <div class="card shadow-sm border-0 rounded-3">
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
+                <table class="table table-fixed table-users align-middle mb-0">
                     <thead class="bg-white border-bottom small text-muted">
                     <tr>
-                        <th>П.І.Б.</th>
-                        <th>Пошта</th>
-                        <th class="text-center">Дозволи</th>
-                        <th class="text-center">Дії</th>
+                        <th><?= sort_link('П.І.Б.', 'full_name', $request) ?></th>
+                        <th><?= sort_link('Пошта', 'email', $request) ?></th>
+                        <th class="text-center" style="width:15%">Дозволи</th>
+                        <th class="text-center" style="width:15%">Дії</th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php foreach ($users as $user): ?>
                         <tr class="border-bottom">
-                            <td class="py-3"><?= htmlspecialchars($user['full_name']) ?></td>
-                            <td class="py-3"><?= htmlspecialchars($user['email']) ?></td>
+                            <td class="py-3 text-truncate"><?= htmlspecialchars($user['full_name']) ?></td>
+                            <td class="py-3 text-truncate"><?= htmlspecialchars($user['email']) ?></td>
                             <td class="text-center py-3">
-                                <?php if (!empty($user['permissions'])): ?>
-                                    <?php $permissions = \classes\PermissionParser::fromString($user['permissions']) ?>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light text-dark border rounded px-3 py-2 "
-                                                type="button"
-                                                id="permDropdown-<?= $user['id'] ?>"
-                                                data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                            <i class="bi bi-shield-lock"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end"
-                                            aria-labelledby="permDropdown-<?= $user['id'] ?>">
-                                            <?php foreach ($permissions as $perm): ?>
-                                                <li class="dropdown-item disabled"><?= htmlspecialchars($perm->label()) ?></li>
-                                            <?php endforeach; ?>
-                                        </ul>
-                                    </div>
-                                <?php else: ?>
-                                    <span class="text-muted small">Відсутні</span>
-                                <?php endif; ?>
+                                <?= render_permission_dropdown($user['permissions'] ?? '', (int)$user['id']) ?>
                             </td>
                             <td class="text-center py-3">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="/users/edit?id=<?= $user['id'] ?>"
                                        class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
-                                       title="Редагувати">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                       title="Редагувати"><i class="bi bi-pencil"></i></a>
+
                                     <button type="button"
                                             class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
                                             title="Видалити"
@@ -71,6 +115,10 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="mt-3">
+            <?= paginationLinks($users) ?>
         </div>
     </div>
 

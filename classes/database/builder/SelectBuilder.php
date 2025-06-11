@@ -40,23 +40,20 @@ class SelectBuilder extends BaseBuilder
         return $this;
     }
 
-    public
-    function fetch(): array
+    public function fetch(): array
     {
         $stmt = $this->prepare();
         $stmt->execute($this->state->params);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public
-    function first(): ?array
+    public function first(): ?array
     {
         $this->limit(1);
         return $this->fetch()[0] ?? null;
     }
 
-    public
-    function count(): int
+    public function count(): int
     {
         $backup = $this->state->columns;
         $this->state->columns = ['COUNT(*) AS cnt'];
@@ -69,15 +66,13 @@ class SelectBuilder extends BaseBuilder
         return $cnt;
     }
 
-    private
-    function prepare(): \PDOStatement
+    private function prepare(): \PDOStatement
     {
         $sql = $this->buildSQL();
         return $this->state->pdo->prepare($sql);
     }
 
-    private
-    function buildSQL(): string
+    private function buildSQL(): string
     {
         $sql = 'SELECT ' . implode(', ', $this->state->columns) . ' FROM ' . $this->state->table;
 
