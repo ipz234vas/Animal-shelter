@@ -27,7 +27,7 @@ class Controller extends BaseController
         ];
     }
 
-    function redirect(string $controller = '', string $action = '', array $params = []): void
+    function redirect(string $controller = '', string $action = '', array $params = []): never
     {
         $path = '/';
 
@@ -44,7 +44,7 @@ class Controller extends BaseController
         $this->redirectToPath($path);
     }
 
-    function redirectToPath($path): void
+    function redirectToPath($path): never
     {
         header("Location: $path");
         exit;

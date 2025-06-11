@@ -63,8 +63,6 @@ class AuthController extends Controller
 
         $nextUrl = $next ? base64_decode($next) : '/';
         $this->redirectToPath($nextUrl);
-
-        return [];
     }
 
     #[Get("register")]
@@ -123,6 +121,5 @@ class AuthController extends Controller
         User::login($user);
 
         $this->redirect();
-        return [];
     }
 }

@@ -18,7 +18,6 @@ class AccountController extends Controller
     public function index(): array
     {
         $this->redirect("account", "profile");
-        return [];
     }
 
     #[Get("profile")]
@@ -97,8 +96,6 @@ class AccountController extends Controller
         $user->save();
 
         $this->redirect("account", "profile");
-
-        return [];
     }
 
     #[Get("delete")]
@@ -133,7 +130,5 @@ class AccountController extends Controller
         User::logout();
 
         $this->redirect();
-
-        return [];
     }
 }

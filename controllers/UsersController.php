@@ -4,6 +4,7 @@ namespace controllers;
 
 use attributes\auth\Authorize;
 use attributes\routing\Get;
+use attributes\routing\Post;
 use classes\Controller;
 use classes\database\builder\BaseBuilder;
 use dto\listRequests\UsersListRequest;
@@ -54,5 +55,16 @@ class UsersController extends Controller
             'request' => $req,
             'perms' => Permission::cases(),
         ]);
+    }
+
+    #[Post('delete')]
+    public function delete(string $next, $id): array
+    {
+        if (!str_starts_with($next, '/')) {
+            $next = '/users';
+        }
+        User::deleteById($id);
+
+        $this->redirectToPath($next);
     }
 }

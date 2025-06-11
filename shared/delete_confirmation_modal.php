@@ -10,6 +10,7 @@
             <div class="modal-body">
                 Ви дійсно хочете видалити користувача <strong id="deleteUserName"></strong>?
                 <input type="hidden" name="id" id="deleteUserId">
+                <input type="hidden" name="next" id="next">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
@@ -25,10 +26,12 @@
         modal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const userId = button.getAttribute('data-id');
+            const next = button.getAttribute('data-next');
             const userName = button.getAttribute('data-name');
             const action = button.getAttribute('data-action');
 
             modal.querySelector('#deleteUserId').value = userId;
+            modal.querySelector('#next').value = next;
             modal.querySelector('#deleteUserName').textContent = userName;
             modal.querySelector('#deleteForm').setAttribute('action', action);
         });

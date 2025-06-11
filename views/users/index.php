@@ -104,6 +104,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteConfirmationModal"
                                             data-id="<?= $user['id'] ?>"
+                                            data-next="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>"
                                             data-name="<?= htmlspecialchars($user['full_name']) ?>"
                                             data-action="/users/delete">
                                         <i class="bi bi-trash"></i>
