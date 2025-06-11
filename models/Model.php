@@ -43,18 +43,14 @@ class Model
         return self::asQuery()->select($columns)->fetch();
     }
 
-    public function save(): bool
+    public function save(): int
     {
         if ($this->isInsert()) {
-            $updatedRows = self::asQuery()->insert($this->fieldsArray)->execute();
-        } else {
-            $updatedRows =
-                self::asQuery()
-                    ->update($this->fieldsArray)
-                    ->where(static::$primaryKey, SQLOperator::Equal, $this->{static::$primaryKey})
-                    ->execute();
-        }
-        return !!$updatedRows;
+            return self::asQuery()->insert($this->fieldsArray)->execute();
+        } else return self::asQuery()
+            ->update($this->fieldsArray)
+            ->where(static::$primaryKey, SQLOperator::Equal, $this->{static::$primaryKey})
+            ->execute();
     }
 
     private function isInsert(): bool
