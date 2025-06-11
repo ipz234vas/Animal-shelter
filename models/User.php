@@ -31,6 +31,12 @@ class User extends Model
         Core::getInstance()->session->remove("user_id");
     }
 
+    public static function getCurrentUser(): array|null
+    {
+        $userid = Core::getInstance()->session->get("user_id");
+        return self::getById($userid);
+    }
+
     public static function getPermissionsById(int $id): ?string
     {
         $row = User::asQuery()->select(["permissions"])->where(static::$primaryKey, SQLOperator::Equal, $id)->first();
