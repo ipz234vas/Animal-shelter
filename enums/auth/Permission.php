@@ -9,4 +9,15 @@ enum Permission: string
     case ManageReviews = 'manage_reviews';
     case ManageUsers = 'manage_users';
     case ManageApplications = 'manage_applications';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::ManageAnimals => "Керування тваринами",
+            self::ManageArticles => "Керування статтями",
+            self::ManageReviews => "Керування відгуками",
+            self::ManageUsers => "Керування користувачами",
+            self::ManageApplications => "Керування заявками",
+        };
+    }
 }

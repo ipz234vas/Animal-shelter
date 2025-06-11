@@ -1,5 +1,5 @@
 <?php
-$this->Title = "Login";
+$this->Title = "Вхід";
 $errs = $errors ?? [];
 require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 ?>
