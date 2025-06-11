@@ -53,7 +53,9 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                     </form>
 
                     <div class="mt-4 text-center small">
-                        <a href="<?= htmlspecialchars($nextUrl) ?>" class="text-decoration-none">← повернутись</a>
+                        <a href="<?= htmlspecialchars($nextUrl) ?>" class="text-decoration-none text-secondary">
+                            ← повернутись
+                        </a>
                     </div>
                 </div>
             </div>

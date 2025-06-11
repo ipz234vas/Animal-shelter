@@ -24,7 +24,6 @@ class ModelBinder
             $propName = $prop->getName();
             $valExists = array_key_exists($propName, $src);
 
-            $propType = $prop->getType();
             $propPath = $path ? "$path.$propName" : $propName;
 
             if (!$valExists) {
@@ -34,7 +33,9 @@ class ModelBinder
 
             $raw = $src[$propName];
 
-            if ($propType instanceof ReflectionNamedType && !$propType->isBuiltin()) {
+            $propType = $prop->getType();
+
+            if ($propType instanceof ReflectionNamedType && !$propType->isBuiltin() && !enum_exists($propType->getName())) {
                 $child = $this->bind($propType->getName(), (array)$raw, $ms, $propPath);
                 $prop->setValue($obj, $child);
 
@@ -46,6 +47,14 @@ class ModelBinder
                 }
                 $prop->setValue($obj, $arr);
 
+            } elseif ($propType instanceof ReflectionNamedType && enum_exists($enumClass = $propType->getName())) {
+
+                /* @var \BackedEnum $enumClass */
+                $enumObj = $enumClass::tryFrom($raw);
+                if ($enumObj === null) {
+                    $ms->add($propPath, "Неприпустиме значення «{$raw}» для $enumClass.");
+                }
+                $prop->setValue($obj, $enumObj);
             } else {
                 $prop->setValue($obj, $raw);
             }
