@@ -1,77 +1,41 @@
 <?php
 $this->Title = "Login";
 $errs = $errors ?? [];
+require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 ?>
 
-<style>
-    body {
-        font-family: sans-serif;
-        margin: 20px;
-    }
-
-    form {
-        background: #f4f4f4;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 400px;
-        margin: auto;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    input[type="email"],
-    input[type="password"] {
-        width: calc(100% - 22px); /* Залишаємо місце для padding та border */
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-
-    button {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    .error {
-        color: red;
-        margin-bottom: 15px;
-    }
-</style>
-<body>
-
-<h1>Вхід до системи</h1>
-
-<form action="/users/login" method="post">
-    <input name="next" type="hidden" value="<?= $next ?? "" ?>"/>
-    <div>
-        <label for="email">Електронна пошта:</label>
-        <input type="email" id="email" name="email" required value="<?= $model->email ?? "" ?>">
-        <?php if (!empty($errs['email'])): ?>
-            <div class="error"><?= implode(', ', $errs['email']) ?></div>
-        <?php endif; ?>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-center">Вхід до системи</h2>
+                    <form action="/users/login" method="post" novalidate>
+                        <input type="hidden" name="next" value="<?= htmlspecialchars($next ?? "") ?>"/>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Електронна пошта</label>
+                            <input type="email"
+                                   class="form-control<?= !empty($errs['email']) ? ' is-invalid' : '' ?>"
+                                   id="email"
+                                   name="email"
+                                   required
+                                   value="<?= htmlspecialchars($model->email ?? "") ?>">
+                            <?= form_error($errs, 'email') ?>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password"
+                                   class="form-control<?= !empty($errs['password']) ? ' is-invalid' : '' ?>"
+                                   id="password"
+                                   name="password"
+                                   required
+                                   value="">
+                            <?= form_error($errs, 'password') ?>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Увійти</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" required value="<?= $model->password ?? "" ?>">
-        <?php if (!empty($errs['password'])): ?>
-            <div class="error"><?= implode(', ', $errs['password']) ?></div>
-        <?php endif; ?>
-    </div>
-    <button type="submit">Увійти</button>
-</form>
-
-</body>
+</div>

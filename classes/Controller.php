@@ -14,8 +14,11 @@ class Controller extends BaseController
         parent::__construct();
     }
 
-    function view(array $params = []): array
+    function view(array $params = [], string $path = ''): array
     {
+        if ($path) {
+            $this->template = new Template($path);
+        }
         if (!empty($params)) {
             $this->template->addParams($params);
         }

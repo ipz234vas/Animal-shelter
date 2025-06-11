@@ -13,13 +13,7 @@ class UsersController extends Controller
     #[Get("index")]
     public function index(): void
     {
-        $user = new User();
-        $user->email = "main_test@gmail.com";
-        $user->permissions = "";
-        $user->full_name = "Main Test";
-        $user->password_hash = User::hashPassword("main_test");
-        $user->save();
-        $this->redirect("home");
+        $this->redirect("users", "login");
     }
 
     #[Get("logout")]
@@ -54,7 +48,7 @@ class UsersController extends Controller
 
         $userRow = User::getByEmail($model->email);
         if (!$userRow || !User::checkPassword($model->password, $userRow['password_hash'])) {
-            $this->modelState->add('password', 'Невірний email або пароль');
+            $this->modelState->add('password', 'Неправильний email або пароль');
             return $this->view([
                 "model" => $model,
                 "errors" => $this->modelState->all(),
