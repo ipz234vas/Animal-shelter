@@ -10,7 +10,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="mb-4 text-center">Вхід до системи</h2>
-                    <form action="/users/login" method="post" novalidate>
+                    <form action="/auth/login" method="post" novalidate>
                         <input type="hidden" name="next" value="<?= htmlspecialchars($next ?? "") ?>"/>
                         <div class="mb-3">
                             <label for="email" class="form-label">Електронна пошта</label>

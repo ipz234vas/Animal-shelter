@@ -4,5 +4,5 @@ $Config[] = [
     'layoutPath' => 'layout/index.php',
     'defaultModule' => 'home',
     'defaultAction' => 'index',
-    'loginPath' => '/users/login',
+    'loginPath' => '/auth/login',
 ];

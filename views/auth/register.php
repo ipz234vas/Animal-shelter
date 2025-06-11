@@ -10,7 +10,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="mb-4 text-center">Реєстрація</h2>
-                    <form action="/users/register" method="post" novalidate>
+                    <form action="/auth/register" method="post" novalidate>
                         <div class="mb-3">
                             <label for="full_name" class="form-label">ПІБ</label>
                             <input type="text"

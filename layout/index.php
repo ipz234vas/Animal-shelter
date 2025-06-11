@@ -54,7 +54,7 @@ $isAuth = \models\User::isUserLoggedIn();
             </button>
 
             <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 pt-1">
                     <li class="nav-item"><a class="nav-link" href="/pets">Тваринки</a></li>
                 </ul>
 
@@ -62,12 +62,12 @@ $isAuth = \models\User::isUserLoggedIn();
                     <?php if ($isAuth): ?>
                         <a class="btn btn-outline-primary"
                            href="/account/profile">Профіль</a>
-                        <form action="/users/logout" method="get" class="m-0">
+                        <form action="/auth/logout" method="get" class="m-0">
                             <button class="btn btn-primary">Вийти</button>
                         </form>
                     <?php else: ?>
-                        <a class="btn btn-outline-primary" href="/users/login">Увійти</a>
-                        <a class="btn btn-primary" href="/users/register">Реєстрація</a>
+                        <a class="btn btn-outline-primary" href="/auth/login">Увійти</a>
+                        <a class="btn btn-primary" href="/auth/register">Реєстрація</a>
                     <?php endif; ?>
                 </div>
             </div>

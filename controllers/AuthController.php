@@ -9,19 +9,19 @@ use dto\LoginDto;
 use dto\RegisterDto;
 use models\User;
 
-class UsersController extends Controller
+class AuthController extends Controller
 {
     #[Get("index")]
     public function index(): void
     {
-        $this->redirect("users", "login");
+        $this->redirect("auth", "login");
     }
 
     #[Get("logout")]
     public function logout(): void
     {
         User::logout();
-        $this->redirect('users', 'login');
+        $this->redirect('auth', 'login');
     }
 
     #[Get("login")]
