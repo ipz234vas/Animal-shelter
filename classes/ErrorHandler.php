@@ -46,7 +46,8 @@ final class ErrorHandler
         http_response_code($code);
 
         $isApi = isset($_SERVER['HTTP_X_API_REQUEST'])
-            || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
+            || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+            || str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'application/json');
 
         if ($code === 401 && !empty($this->loginPath) && !$isApi) {
             $uri = base64_encode($_SERVER['REQUEST_URI'] ?? '/');
@@ -58,7 +59,7 @@ final class ErrorHandler
 
         if ($isApi) {
             header('Content-Type: application/json');
-            echo json_encode(['error' => $e->getMessage(), 'code' => $code]);
+            echo json_encode(['errors' => $e->getMessage(), 'code' => $code]);
         } else {
             $view = __DIR__ . "/../../views/errors/{$code}.php";
             echo file_exists($view)

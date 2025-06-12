@@ -11,7 +11,7 @@ class CreateAnimalRequest
     public string $name;
 
     #[Required]
-    public int $species_id;
+    public string|int $species_id = '';
 
     #[Required]
     public Sex $sex = Sex::Unknown;
