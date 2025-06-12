@@ -2,6 +2,7 @@
 
 namespace dto\animals;
 
+use attributes\binding\Collection;
 use attributes\validation\{Required, MinLength, Range};
 use enums\animals\Sex;
 
@@ -22,4 +23,6 @@ class CreateAnimalRequest
     public ?int $age_max_months = null;
 
     public ?string $description = null;
+
+    public array $tag_ids = [];
 }

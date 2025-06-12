@@ -2,19 +2,22 @@
 
 namespace controllers\api;
 
+use attributes\routing\Delete;
+use attributes\routing\Get;
+use attributes\routing\Post;
+use attributes\routing\Put;
 use classes\ApiController;
-use dto\species\SpeciesCreateRequest;
-use dto\species\SpeciesUpdateRequest;
+use dto\tags\TagCreateRequest;
+use dto\tags\TagUpdateRequest;
 use enums\database\SQLOperator;
-use attributes\routing\{Get, Post, Put, Delete};
-use models\Species;
+use models\Tag;
 
-class SpeciesApiController extends ApiController
+class TagsApiController extends ApiController
 {
     #[Get('index')]
     public function index(int $page = 1, int $per_page = 20): never
     {
-        $base = Species::asQuery()->select();
+        $base = Tag::asQuery()->select();
         $total = (clone $base)->count();
         $rows = $base->limit($per_page)
             ->offset(($page - 1) * $per_page)
@@ -28,7 +31,7 @@ class SpeciesApiController extends ApiController
     #[Get('list')]
     public function list(?string $query = null): never
     {
-        $q = Species::asQuery()->select();
+        $q = Tag::asQuery()->select();
         if ($query)
             $q->where('name', SQLOperator::Like, "%$query%");
         $this->respondSuccess($q->orderBy("name")->limit(20)->fetch());
@@ -37,53 +40,53 @@ class SpeciesApiController extends ApiController
     #[Get('get')]
     public function get(int $id): never
     {
-        $row = Species::getById($id);
+        $row = Tag::getById($id);
         $row
             ? $this->respondSuccess($row)
             : $this->respondError('Не знайдено', 404, 'NOT_FOUND');
     }
 
     #[Post('create')]
-    public function create(SpeciesCreateRequest $dto): never
+    public function create(TagCreateRequest $dto): never
     {
-        if (Species::existsByName($dto->name))
-            $this->modelState->add('name', 'Такий вид уже існує.');
+        if (Tag::existsByName($dto->name))
+            $this->modelState->add('name', 'Такий тег уже існує.');
 
         if (!$this->modelState->isValid())
             $this->respondError($this->modelState->all(), 422);
 
-        $s = new Species();
-        $s->name = trim($dto->name);
-        $id = $s->save();
+        $tag = new Tag();
+        $tag->name = trim($dto->name);
+        $id = $tag->save();
 
-        $this->respondSuccess($id, [], 201);     // 201 Created
+        $this->respondSuccess($id, [], 201);
     }
 
     #[Put('update')]
-    public function update(SpeciesUpdateRequest $dto): never
+    public function update(TagUpdateRequest $dto): never
     {
-        $row = Species::getById($dto->id) ??
+        $row = Tag::getById($dto->id) ??
             $this->respondError('Не знайдено', 404, 'NOT_FOUND');
 
         if ($row['name'] !== $dto->name &&
-            Species::existsByName($dto->name))
-            $this->modelState->add('name', 'Такий вид уже існує.');
+            Tag::existsByName($dto->name))
+            $this->modelState->add('name', 'Такий тег уже існує.');
 
         if (!$this->modelState->isValid())
             $this->respondError($this->modelState->all(), 422);
 
-        $sp = new Species();
-        $sp->id = $dto->id;
-        $sp->name = trim($dto->name);
-        $sp->save();
+        $tag = new Tag();
+        $tag->id = $dto->id;
+        $tag->name = trim($dto->name);
+        $tag->save();
 
-        $this->respondSuccess($sp);
+        $this->respondSuccess($tag);
     }
 
     #[Delete('destroy')]
     public function delete(int $id): never
     {
-        Species::deleteById($id)
+        Tag::deleteById($id)
             ? $this->respondSuccess(['id' => $id])
             : $this->respondError('Не знайдено', 404, 'NOT_FOUND');
     }

@@ -11,6 +11,7 @@ use classes\ModelState;
 use dto\animals\CreateAnimalRequest;
 use models\Animal;
 use enums\auth\Permission;
+use models\AnimalTag;
 
 #[Authorize(Permission::ManageAnimals)]
 class AnimalsController extends Controller
@@ -19,7 +20,6 @@ class AnimalsController extends Controller
     public function create(ModelState $state): array
     {
         return $this->view([
-            'species' => [],
             'state' => $state,
             'dto' => new CreateAnimalRequest(),
         ]);
@@ -45,24 +45,41 @@ class AnimalsController extends Controller
             );
         }
 
+        foreach ($dto->tag_ids as $tid) {
+            if (!ctype_digit((string)$tid)) {
+                $this->modelState->add('tag_ids', "Недійсний ID тегу: $tid");
+            }
+        }
+
         if (!$this->modelState->isValid()) {
             return $this->view([
-                'species' => [],
                 'state' => $this->modelState,
                 'dto' => $dto,
             ]);
         }
+        $db = \classes\Core::getInstance()->db;
+        $db->pdo->beginTransaction();
+        try {
+            $animal = new Animal();
+            $animal->name = $dto->name;
+            $animal->species_id = $dto->species_id;
+            $animal->sex = $dto->sex->value;
+            $animal->age_min_months = $dto->age_min_months;
+            $animal->age_max_months = $dto->age_max_months;
+            $animal->description = $dto->description;
+            $animal->cover_image_url = "/uploads/images/$imgName";
+            $animal->intro_video_url = $vidName ? "/uploads/videos/$vidName" : null;
+            $id = $animal->save();
 
-        $a = new Animal();
-        $a->name = $dto->name;
-        $a->species_id = $dto->species_id;
-        $a->sex = $dto->sex->value;
-        $a->age_min_months = $dto->age_min_months;
-        $a->age_max_months = $dto->age_max_months;
-        $a->description = $dto->description;
-        $a->cover_image_url = "/uploads/images/$imgName";
-        $a->intro_video_url = $vidName ? "/uploads/videos/$vidName" : null;
-        $a->save();
+            foreach ($dto->tag_ids as $tid) {
+                AnimalTag::attach($id, $tid);
+            }
+
+            $db->pdo->commit();
+        } catch (\Throwable $e) {
+            $db->pdo->rollBack();
+            throw $e;
+        }
 
         $this->redirect('animals', 'index');
     }

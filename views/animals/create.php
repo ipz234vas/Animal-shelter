@@ -41,13 +41,22 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                             <label for="speciesSelect" class="form-label">Вид</label>
                             <select id="speciesSelect"
                                     name="species_id"
-                                    class="form-select p-0 <?= $state->first('species_id') ? ' is-invalid' : '' ?>"
                                     data-api="/species"
-                                    data-current-id="<?= (int)$dto->species_id ?>">
-                                <option value=""<?= $dto->species_id ? '' : ' selected' ?> disabled>Оберіть вид…
-                                </option>
+                                    data-current="<?= (int)$dto->species_id ?>">
                             </select>
                             <?= form_error($state->all(), 'species_id') ?>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Особливості</label>
+                            <select id="tagsSelect"
+                                    name="tag_ids[]"
+                                    multiple
+                                    data-api="/tags"
+                                    data-selected="<?= implode(', ', array_map('intval', $dto->tag_ids ?? [])) ?>">
+                            </select>
+
+                            <?= form_error($state->all(), 'tag_ids') ?>
                         </div>
 
                         <!-- ======= 1. Стать як кнопки ======= -->
@@ -167,66 +176,4 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 
     window.addEventListener('DOMContentLoaded', () => syncAge());
 </script>
-<script type="module">
-    document.addEventListener('DOMContentLoaded', async () => {
-        /* ------------ базові змінні ------------ */
-        const select = document.getElementById('speciesSelect');
-        const apiBase = select.dataset.api;                 // "/api/species"
-        const currentId = select.dataset.currentId;
-        const HEADERS = {'Content-Type': 'application/json'};
-
-        async function api(path, opts = {}) {
-            const res = await fetch(`${apiBase}${path}`, {...opts, headers: HEADERS});
-            const json = await res.json();
-            if (!json.success) throw json;
-            return json.data;
-        }
-
-        /* ------------ Tom Select ------------ */
-        const ts = new TomSelect(select, {
-            preload: true,                 // перший GET '' при ініціалізації
-            valueField: 'id',
-            labelField: 'name',
-            searchField: 'name',
-            maxOptions: 20,
-            placeholder: 'Почніть вводити…',
-            persist: false,
-            createFilter: v => v.length >= 2,   // мінімум 2 символи для нового виду
-            loadThrottle: 300,
-
-            /* --- пошук --- */
-            load: async (query, cb) => {
-                try {
-                    const data = await api(`/list?query=${encodeURIComponent(query)}`);
-                    cb(data);                    // [{id,name}, …]
-                } catch {
-                    cb();
-                }
-            },
-
-            /* --- створення нового виду --- */
-            create: async (input, cb) => {
-                try {
-                    const {id} = await api('/create', {
-                        method: 'POST',
-                        body: JSON.stringify({name: input})
-                    });
-                    cb({id, name: input});     // обираємо новий варіант
-                } catch (e) {
-                    alert(e.errors?.name?.[0] ?? 'Помилка створення виду');
-                    cb(null);
-                }
-            }
-        });
-
-        if (currentId) {
-            try {
-                const {id, name} = await api(`/get?id=${currentId}`);
-                ts.addOption({id, name});
-                ts.setValue(id);
-            } catch (e) {
-                console.error('Не вдалося завантажити назву виду:', e);
-            }
-        }
-    });
-</script>
+<script type="module" src="../../public/js/useCustomSelect.js"></script>

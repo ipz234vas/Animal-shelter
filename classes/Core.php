@@ -39,7 +39,7 @@ class Core
         session_start();
 
         $this->errors = new ErrorHandler();
-        $this->useErrorHandler();
+        //$this->useErrorHandler();
 
         $cng = Config::getInstance();
         $this->errors->setLoginPath($cng->loginPath);
