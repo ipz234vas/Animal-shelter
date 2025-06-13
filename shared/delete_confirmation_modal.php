@@ -8,7 +8,7 @@
                         aria-label="Закрити"></button>
             </div>
             <div class="modal-body">
-                Ви дійсно хочете видалити користувача <strong id="deleteUserName"></strong>?
+                Ви дійсно хочете видалити <strong id="deleteUserName"></strong>?
                 <input type="hidden" name="id" id="deleteUserId">
                 <input type="hidden" name="next" id="next">
             </div>

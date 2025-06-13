@@ -3,6 +3,8 @@
 namespace models;
 
 use classes\Core;
+use classes\PermissionParser;
+use enums\auth\Permission;
 use enums\database\SQLOperator;
 
 /**
@@ -57,5 +59,15 @@ class User extends Model
     public static function hashPassword(string $password): string
     {
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    public static function hasPermission(Permission $permission): bool
+    {
+        $userId = Core::getInstance()->session->get("user_id");
+        if (!$userId)
+            return false;
+        $strPermissions = static::getPermissionsById($userId);
+        $permissions = PermissionParser::fromString($strPermissions);
+        return in_array($permission, $permissions);
     }
 }

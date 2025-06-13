@@ -9,14 +9,13 @@ use attributes\routing\Post;
 use classes\Controller;
 use dto\animals\CreateAnimalRequest;
 use dto\listRequests\AnimalsListRequest;
+use enums\auth\Permission;
 use enums\database\SQLOperator;
 use models\Animal;
-use enums\auth\Permission;
 use models\AnimalTag;
 use models\Species;
 use models\Tag;
 
-#[Authorize(Permission::ManageAnimals)]
 class AnimalsController extends Controller
 {
     #[Get('index')]
@@ -26,6 +25,8 @@ class AnimalsController extends Controller
 
         $base = Animal::asQuery()
             ->select(['animals.*'])
+            ->where("animals.is_adopted", SQLOperator::Equal, false)
+            ->where("animals.is_deleted", SQLOperator::Equal, false)
             ->join('species', 'species.id = animals.species_id', "LEFT");
 
         if ($req->query) {
@@ -48,10 +49,34 @@ class AnimalsController extends Controller
             $base->where('is_adopted', SQLOperator::Equal, $req->adopted);
         }
 
-        if ($req->age_min !== null)
-            $base->where('age_min_months', SQLOperator::GreaterEqual, $req->age_min);
-        if ($req->age_max !== null)
-            $base->where('age_max_months', SQLOperator::LessEqual, $req->age_max);
+        $amin = $req->age_min ?: null;
+        $amax = $req->age_max ?: null;
+
+        if ($amin !== null) {
+            $base->andWhereGroup(fn($g) => $g
+                ->andWhereGroup(fn($b) => $b
+                    ->where('age_min_months', SQLOperator::NotEqual, 0)
+                    ->where('age_min_months', SQLOperator::GreaterEqual, $amin)
+                )
+                ->orWhereGroup(fn($b) => $b
+                    ->where('age_max_months', SQLOperator::NotEqual, 0)
+                    ->where('age_max_months', SQLOperator::GreaterEqual, $amin)
+                )
+            );
+        }
+
+        if ($amax !== null) {
+            $base->andWhereGroup(fn($g) => $g
+                ->andWhereGroup(fn($b) => $b
+                    ->where('age_min_months', SQLOperator::Equal, 0)
+                    ->orWhere('age_min_months', SQLOperator::LessEqual, $amax)
+                )
+                ->andWhereGroup(fn($b) => $b
+                    ->where('age_max_months', SQLOperator::Equal, 0)
+                    ->orWhere('age_max_months', SQLOperator::LessEqual, $amax)
+                )
+            );
+        }
 
         if ($req->tag_ids) {
             $base->join('animal_tags', 'animal_tags.animal_id = animals.id', 'INNER')
@@ -78,6 +103,35 @@ class AnimalsController extends Controller
         ]);
     }
 
+    #[Get('show')]
+    public function show(int $id): array
+    {
+        /* ---- 1. тваринка + назва виду ----------------------------------- */
+        $row = Animal::asQuery()
+            ->select([
+                'animals.*',
+                's.name   AS species_name'     // ← одразу дістаємо назву виду
+            ])
+            ->join('species s', 's.id = animals.species_id', "LEFT")
+            ->where('animals.id', \enums\database\SQLOperator::Equal, $id)
+            ->first();
+
+        if (!$row || $row['is_deleted']) {
+            throw new \classes\exceptions\HttpException(404);
+        }
+
+        $tags = AnimalTag::asQuery()
+            ->select(['t.id', 't.name'])
+            ->join('tags t', 't.id = animal_tags.tag_id')
+            ->where('animal_tags.animal_id', \enums\database\SQLOperator::Equal, $id)
+            ->fetch();
+
+        $row['tags'] = $tags;
+
+        return $this->view(['a' => $row]);
+    }
+
+    #[Authorize(Permission::ManageAnimals)]
     #[Get('create')]
     public function create(): array
     {
@@ -87,6 +141,7 @@ class AnimalsController extends Controller
         ]);
     }
 
+    #[Authorize(Permission::ManageAnimals)]
     #[Post('create')]
     public function store(CreateAnimalRequest $dto): array
     {
@@ -144,5 +199,25 @@ class AnimalsController extends Controller
         }
 
         $this->redirect('animals', 'index');
+    }
+
+    #[Authorize(Permission::ManageAnimals)]
+    #[Post('archive')]
+    public function archive(int $id, ?string $next = null): never
+    {
+        $row = Animal::getById($id);
+        if (!$row || $row['is_deleted']) {
+            throw new \classes\exceptions\HttpException(404);
+        }
+
+        Animal::asQuery()
+            ->update([
+                'is_deleted' => true
+            ])
+            ->where('id', SQLOperator::Equal, $id)
+            ->execute();
+
+        $back = $next ? base64_decode($next) : '/animals';
+        $this->redirectToPath($back);
     }
 }

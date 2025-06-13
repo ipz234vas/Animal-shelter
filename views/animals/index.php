@@ -7,13 +7,27 @@
 
 use dto\listRequests\AnimalsListRequest;
 use enums\animals\Sex;
+use enums\auth\Permission;
 
 require_once 'app/helpers/animals.php';
 require_once 'app/helpers/forms.php';
 require_once 'app/helpers/pagination.php';
-?>
 
+$canManage = \models\User::hasPermission(Permission::ManageAnimals);
+?>
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 0 1rem rgba(0, 0, 0, .2) !important;
+    }
+</style>
 <div class="container-fluid mt-3">
+    <?php if ($canManage): ?>
+        <div class="d-flex justify-content-end mb-3">
+            <a href="/animals/create" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Додати тваринку
+            </a>
+        </div>
+    <?php endif; ?>
     <div class="row">
         <aside class="col-md-4 col-lg-3 mb-3">
             <form class="bg-light p-3 rounded shadow-sm">
@@ -128,20 +142,49 @@ require_once 'app/helpers/pagination.php';
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
                 <?php foreach ($animals->items as $a): ?>
                     <div class="col">
-                        <div class="card h-100 shadow-sm">
-                            <img src="<?= htmlspecialchars($a['cover_image_url']) ?>"
-                                 class="card-img-top" style="object-fit:cover;height:220px">
-                            <div class="card-body">
-                                <h6 class="card-title mb-1"><?= htmlspecialchars($a['name']) ?></h6>
-                                <div class="text-muted small">
-                                    <?= ucfirst(Sex::tryFrom($a['sex'])->label()) ?>,
-                                    <?= animal_age($a['age_min_months'] ?? 0,
-                                        $a['age_max_months'],
-                                        $a['updated_at']) ?>
+                        <div class="card h-100 shadow-sm hover-shadow">
+
+                            <!-- обгортка-посилання залишається лише на зображенні + описі -->
+                            <a href="/animals/show?id=<?= $a['id'] ?>"
+                               class="text-decoration-none text-reset d-block">
+                                <img src="<?= htmlspecialchars($a['cover_image_url']) ?>"
+                                     class="card-img-top" style="object-fit:cover;height:220px">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-1"><?= htmlspecialchars($a['name']) ?></h6>
+                                    <div class="text-muted small">
+                                        <?= ucfirst(Sex::tryFrom($a['sex'])->label()) ?>,
+                                        <?= animal_age($a['age_min_months'] ?? 0, $a['age_max_months'], $a['updated_at']) ?>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-footer small text-end">
-                                ID <?= $a['id'] ?>
+                            </a>
+
+                            <?php $next = base64_encode($_SERVER['REQUEST_URI']); ?>
+                            <div class="card-footer d-flex justify-content-between align-items-center small">
+
+                                <?php if ($canManage): ?>
+                                    <div class="btn-group btn-group-sm">
+
+                                        <a href="/animals/edit?id=<?= $a['id'] ?>"
+                                           class="btn btn-outline-secondary"
+                                           title="Редагувати">
+                                            <i class="bi bi-pencil fs-6"></i>
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                title="Видалити"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmationModal"
+                                                data-id="<?= $a['id'] ?>"
+                                                data-name="<?= htmlspecialchars($a['name']) ?>"
+                                                data-action="/animals/archive"
+                                                data-next="<?= $next ?>">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+
+                                <span>ID&nbsp;<?= $a['id'] ?></span>
                             </div>
                         </div>
                     </div>
@@ -177,3 +220,4 @@ require_once 'app/helpers/pagination.php';
 </script>
 
 <script type="module" src="../../public/js/useCustomSelect.js"></script>
+<?php require dirname(__DIR__, 2) . '/shared/delete_confirmation_modal.php'; ?>

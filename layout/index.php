@@ -58,7 +58,7 @@ $isAuth = \models\User::isUserLoggedIn();
 
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 pt-1">
-                    <li class="nav-item"><a class="nav-link" href="/pets">Тваринки</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/animals">Тваринки</a></li>
                 </ul>
 
                 <div class="d-flex gap-2">
