@@ -64,6 +64,9 @@ class UsersController extends Controller
     #[Get('edit')]
     public function edit(int $id, ?string $next = null): array
     {
+        $user = User::getCurrentUser();
+        if ($user["id"] === $id)
+            throw new HttpException(403);
         $userRow = User::getById($id);
         if (!$userRow) {
             throw new HttpException(404);
@@ -82,6 +85,9 @@ class UsersController extends Controller
     #[Post('edit')]
     public function updatePermissions(int $id, ?array $permissions = [], ?string $next = null): array
     {
+        $user = User::getCurrentUser();
+        if ($user["id"] === $id)
+            throw new HttpException(403);
         $rows = User::getById($id);
         if (!$rows) {
             throw new HttpException(404);

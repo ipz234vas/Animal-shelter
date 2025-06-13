@@ -66,14 +66,19 @@ $can = static fn(\enums\auth\Permission $p) => in_array($p, $permissions);
                     <li class="nav-item">
                         <a class="nav-link" href="/animals">Тваринки</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reviews/public">Ми вдома</a>
+                    </li>
                     <?php if ($isAuth): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="/adoptions">Мої заявки</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/reviews">Мої відгуки</a>
+                        </li>
                     <?php endif; ?>
                     <?php if ($can(\enums\auth\Permission::ManageUsers)
                         || $can(\enums\auth\Permission::ManageApplications)
-                        || $can(\enums\auth\Permission::ManageArticles)
                         || $can(\enums\auth\Permission::ManageReviews)): ?>
 
                         <li class="nav-item dropdown">
@@ -91,11 +96,6 @@ $can = static fn(\enums\auth\Permission $p) => in_array($p, $permissions);
                                 <?php if ($can(\enums\auth\Permission::ManageApplications)): ?>
                                     <li><a class="dropdown-item" href="/adoptions/manage">
                                             <i class="bi bi-inboxes me-1"></i> Заявки</a></li>
-                                <?php endif; ?>
-
-                                <?php if ($can(\enums\auth\Permission::ManageArticles)): ?>
-                                    <li><a class="dropdown-item" href="/articles/manage">
-                                            <i class="bi bi-journal-text me-1"></i> Статті</a></li>
                                 <?php endif; ?>
 
                                 <?php if ($can(\enums\auth\Permission::ManageReviews)): ?>
@@ -129,8 +129,15 @@ $can = static fn(\enums\auth\Permission $p) => in_array($p, $permissions);
 </main>
 
 <footer class="bg-light text-center py-3 small text-muted">
-    &copy; <?= date('Y') ?> Притулок для тварин Кам'янської Міської Ради - усі права захищено
+    <div class="container">
+        <div>&copy; <?= date('Y') ?> Притулок для тварин Кам'янської Міської Ради — усі права захищено</div>
+        <div class="mt-1">
+            📞 <a href="tel:+380636312879" class="text-muted text-decoration-none">0 (63) 631 28 79</a> |
+            📞 <a href="tel:+380632026858" class="text-muted text-decoration-none">0 (63) 202 68 58</a>
+        </div>
+    </div>
 </footer>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>

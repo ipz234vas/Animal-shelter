@@ -61,7 +61,7 @@ final class ErrorHandler
             header('Content-Type: application/json');
             echo json_encode(['errors' => $e->getMessage(), 'code' => $code]);
         } else {
-            $view = __DIR__ . "/../../views/errors/{$code}.php";
+            $view = dirname(__DIR__) . "/views/errors/{$code}.php";
             echo file_exists($view)
                 ? file_get_contents($view)
                 : "<h1>{$code}</h1><p>{$e->getMessage()}</p>";

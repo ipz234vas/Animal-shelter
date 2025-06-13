@@ -17,9 +17,9 @@ use models\Adoption;
 use models\Review;
 use models\ReviewImage;
 
-#[Authorize]
 class ReviewsController extends Controller
 {
+    #[Authorize]
     #[Get('create')]
     public function create(int $application_id): array
     {
@@ -48,6 +48,7 @@ class ReviewsController extends Controller
         ]);
     }
 
+    #[Authorize]
     #[Post('create')]
     public function store(CreateReviewRequest $dto): array
     {

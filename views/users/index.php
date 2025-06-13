@@ -7,6 +7,7 @@
 use dto\listRequests\UsersListRequest;
 use dto\pagination\PaginatedResult;
 use enums\auth\Permission;
+use models\User;
 
 $this->Title = "Користувачі";
 
@@ -95,21 +96,23 @@ require_once dirname(__DIR__, 2) . '/app/helpers/permission_dropdown_renderer.ph
                             </td>
                             <td class="text-center py-3">
                                 <div class="d-flex justify-content-center gap-2">
-                                    <a href="/users/edit?id=<?= $user['id'] ?>&next=<?= $next ?>"
-                                       class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
-                                       title="Редагувати"><i class="bi bi-pencil"></i></a>
+                                    <?php if ((int)$user['id'] !== (int)User::getCurrentUser()['id']): ?>
+                                        <a href="/users/edit?id=<?= $user['id'] ?>&next=<?= $next ?>"
+                                           class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
+                                           title="Редагувати"><i class="bi bi-pencil"></i></a>
 
-                                    <button type="button"
-                                            class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
-                                            title="Видалити"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteConfirmationModal"
-                                            data-id="<?= $user['id'] ?>"
-                                            data-next="<?= $next ?>"
-                                            data-name="<?= htmlspecialchars($user['full_name']) ?>"
-                                            data-action="/users/delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-light text-dark border rounded px-2 py-2"
+                                                title="Видалити"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmationModal"
+                                                data-id="<?= $user['id'] ?>"
+                                                data-next="<?= $next ?>"
+                                                data-name="<?= htmlspecialchars($user['full_name']) ?>"
+                                                data-action="/users/delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
