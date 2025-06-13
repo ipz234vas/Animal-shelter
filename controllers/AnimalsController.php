@@ -28,7 +28,6 @@ class AnimalsController extends Controller
 
         $base = Animal::asQuery()
             ->select(['animals.*'])
-            ->where("animals.is_adopted", SQLOperator::Equal, false)
             ->where("animals.is_deleted", SQLOperator::Equal, false)
             ->join('species', 'species.id = animals.species_id', "LEFT");
 
@@ -48,8 +47,10 @@ class AnimalsController extends Controller
             $base->where('sex', SQLOperator::Equal, $sex->value);
         }
 
-        if ($req->adopted !== null) {
-            $base->where('is_adopted', SQLOperator::Equal, $req->adopted);
+        if ($req->adopted === null || $req->adopted === false) {
+            $base->where('animals.is_adopted', SQLOperator::Equal, false);
+        } elseif ($req->adopted) {
+            $base->where('animals.is_adopted', SQLOperator::Equal, true);
         }
 
         $amin = $req->age_min ?: null;

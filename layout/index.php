@@ -5,6 +5,11 @@
 $Title = $Title ?? "Кам'янський притулок";
 $Content = $Content ?? '';
 $isAuth = \models\User::isUserLoggedIn();
+$permissionsStr = $isAuth
+    ? \models\User::getPermissionsById(\models\User::getCurrentUser()['id'])
+    : "";
+$permissions = \classes\PermissionParser::fromString($permissionsStr);
+$can = static fn(\enums\auth\Permission $p) => in_array($p, $permissions);
 ?>
 <!doctype html>
 <html lang="uk">
@@ -58,7 +63,48 @@ $isAuth = \models\User::isUserLoggedIn();
 
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 pt-1">
-                    <li class="nav-item"><a class="nav-link" href="/animals">Тваринки</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/animals">Тваринки</a>
+                    </li>
+                    <?php if ($isAuth): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/adoptions">Мої заявки</a>
+                        </li>
+                    <?php endif; ?>
+                    <?php if ($can(\enums\auth\Permission::ManageUsers)
+                        || $can(\enums\auth\Permission::ManageApplications)
+                        || $can(\enums\auth\Permission::ManageArticles)
+                        || $can(\enums\auth\Permission::ManageReviews)): ?>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Адмін&nbsp;панель
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                <?php if ($can(\enums\auth\Permission::ManageUsers)): ?>
+                                    <li><a class="dropdown-item" href="/users">
+                                            <i class="bi bi-people me-1"></i> Користувачі</a></li>
+                                <?php endif; ?>
+
+                                <?php if ($can(\enums\auth\Permission::ManageApplications)): ?>
+                                    <li><a class="dropdown-item" href="/adoptions/manage">
+                                            <i class="bi bi-inboxes me-1"></i> Заявки</a></li>
+                                <?php endif; ?>
+
+                                <?php if ($can(\enums\auth\Permission::ManageArticles)): ?>
+                                    <li><a class="dropdown-item" href="/articles/manage">
+                                            <i class="bi bi-journal-text me-1"></i> Статті</a></li>
+                                <?php endif; ?>
+
+                                <?php if ($can(\enums\auth\Permission::ManageReviews)): ?>
+                                    <li><a class="dropdown-item" href="/reviews/manage">
+                                            <i class="bi bi-chat-left-text me-1"></i> Відгуки</a></li>
+                                <?php endif; ?>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
                 </ul>
 
                 <div class="d-flex gap-2">
