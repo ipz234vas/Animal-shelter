@@ -19,6 +19,15 @@ class SelectBuilder extends BaseBuilder
         return $this;
     }
 
+    public function groupBy(string ...$columns): static
+    {
+        if (count($columns) === 1 && is_array($columns[0])) {
+            $columns = $columns[0];
+        }
+        $this->state->groupBy = array_merge($this->state->groupBy, $columns);
+        return $this;
+    }
+
     public
     function orderBy(string $expression, SQLOrderDirection $direction = SQLOrderDirection::Ascending): static
     {
@@ -81,6 +90,10 @@ class SelectBuilder extends BaseBuilder
         }
 
         $sql .= $this->buildWhereClause();
+
+        if ($this->state->groupBy) {
+            $sql .= ' GROUP BY ' . implode(', ', $this->state->groupBy);
+        }
 
         if ($this->state->orderBy) {
             $sql .= ' ORDER BY ' . implode(', ', $this->state->orderBy);

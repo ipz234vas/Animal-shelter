@@ -2,7 +2,6 @@
 
 namespace dto\animals;
 
-use attributes\binding\Collection;
 use attributes\validation\{Required, MinLength, Range};
 use enums\animals\Sex;
 

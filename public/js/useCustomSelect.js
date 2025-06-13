@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .split(',')
             .map(s => parseInt(s, 10))
             .filter(Boolean);
+        const placeholder = sel.dataset.placeholder
 
         async function api(path, opts = {}) {
             const r = await fetch(`${apiBase}${path}`, {...opts, headers: HEADERS});
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             valueField: 'id',
             labelField: 'name',
             searchField: 'name',
-            placeholder: multi ? 'Виберіть або створіть…' : 'Почніть вводити…',
+            placeholder: placeholder || (multi ? 'Виберіть або створіть…' : 'Почніть вводити…'),
             persist: false,
             createFilter: v => allowCreate && v.length >= 2,
             loadThrottle: 300,
@@ -39,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             create: allowCreate ? async function (input, cb) {
                 try {
-                    const {id} = await api('/create', {
+                    const id = await api('/create', {
                         method: 'POST',
                         body: JSON.stringify({name: input})
                     });
