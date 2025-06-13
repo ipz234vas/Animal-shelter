@@ -1,5 +1,7 @@
 <?php
-/** @var array $a (див. контролер) */
+/** @var array $a */
+/** @var bool $accepted_any */
+/** @var int|null $pending_cnt */
 
 require_once 'app/helpers/animals.php';
 
@@ -7,11 +9,10 @@ use enums\animals\Sex;
 
 ?>
 <style>
-    /* ---------- портрет-контейнер --------- */
     .media-wrapper {
         position: relative;
         aspect-ratio: 9/16;
-        max-width: 340px; /* щоб не був «білбордом» */
+        max-width: 340px;
         max-height: 600px;
         margin: auto;
         background: #000;
@@ -23,21 +24,18 @@ use enums\animals\Sex;
         justify-content: center;
     }
 
-    /* відео показуємо повністю (зі «штанами») */
     .media-wrapper video {
         width: 100%;
         height: 100%;
         object-fit: contain;
     }
 
-    /* зображення — заповнює блок */
     .media-wrapper img {
         width: 100%;
         height: 100%;
         object-fit: cover;
     }
 
-    /* mute-кнопка */
     .media-wrapper button {
         position: absolute;
         right: .5rem;
@@ -70,7 +68,6 @@ use enums\animals\Sex;
 
 <div class="card shadow-sm card-animal">
     <div class="row g-0">
-        <!-- LEFT COL – video + image fallback -->
         <div class="col-md-6">
             <?php if ($a['intro_video_url']): ?>
                 <div class="media-wrapper">
@@ -79,13 +76,11 @@ use enums\animals\Sex;
                         <source src="<?= htmlspecialchars($a['intro_video_url']) ?>">
                     </video>
                     <button id="volBtn">
-                        <!-- mute -->
                         <svg id="volOff" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              class="bi bi-volume-mute" viewBox="0 0 16 16">
                             <path d="M9.717 3.55 6.825 6H4.333A.333.333 0 0 0 4 6.333v3.334c0 .184.149.333.333.333h2.492l2.892 2.45A.333.333 0 0 0 10 12.117V3.883a.333.333 0 0 0-.283-.333z"/>
                             <path d="M13.002 9.595 11.404 8l1.598-1.595-.708-.708L10.707 7.293 9.11 5.697l-.708.708L10.586 8l-2.184 2.184.708.708L10.707 8.707l1.588 1.588.707-.707z"/>
                         </svg>
-                        <!-- un-mute -->
                         <svg id="volOn" class="d-none" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                              viewBox="0 0 16 16">
                             <path d="M9.717 3.55 6.825 6H4.333A.333.333 0 0 0 4 6.333v3.334c0 .184.149.333.333.333h2.492l2.892 2.45A.333.333 0 0 0 10 12.117V3.883a.333.333 0 0 0-.283-.333z"/>
@@ -102,7 +97,6 @@ use enums\animals\Sex;
             <?php endif; ?>
         </div>
 
-        <!-- RIGHT COL – info -->
         <div class="col-md-6">
             <div class="card-body h-100 d-flex flex-column">
                 <h3 class="card-title"><?= htmlspecialchars($a['name']) ?>
@@ -130,17 +124,29 @@ use enums\animals\Sex;
                 <?php endif; ?>
 
                 <div class="mt-auto">
-                    <a href="/adopt/apply?animal_id=<?= $a['id'] ?>"
-                       class="btn btn-primary w-100">
-                        Подарувати дім
-                    </a>
+                    <?php if ($accepted_any): ?>
+                        <div class="alert alert-warning text-center mb-0">
+                            Чиясь заявка на цю тварину вже <strong>прийнята</strong>.
+                        </div>
+
+                    <?php else: ?>
+                        <?php if ($pending_cnt > 0): ?>
+                            <p class="small text-muted text-center mb-2">
+                                Уже подано заявок:&nbsp;<strong><?= $pending_cnt ?></strong>
+                            </p>
+                        <?php endif; ?>
+
+                        <a href="/adoptions/create?animal_id=<?= $a['id'] ?>"
+                           class="btn btn-primary w-100">
+                            Подарувати дім
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- simple mute/unmute toggle -->
 <script>
     (() => {
         const video = document.querySelector('video');

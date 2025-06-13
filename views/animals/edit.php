@@ -1,7 +1,6 @@
 <?php
-/**
- * @var int $id
- * @var dto\animals\CreateAnimalRequest $dto
+/** @var int $id
+ * @var dto\animals\UpdateAnimalRequest $dto
  * @var classes\ModelState $state
  * @var string|null $cover
  * @var string|null $video
@@ -9,15 +8,22 @@
 
 use enums\animals\Sex;
 
-$minYears = $minMonths = $maxYears = $maxMonths = '';
-if (($dto->age_min_months ?? 0) > 0) {
-    $minYears = intdiv($dto->age_min_months, 12);
-    $minMonths = $dto->age_min_months % 12;
+/* 1 місяць ≈ 2 592 000 с (60 × 60 × 24 × 30).                */
+$monthsDelta = 0;
+if (!empty($dto->updated_at)) {
+    $monthsDelta = max(
+        0,
+        (int)floor((time() - strtotime($dto->updated_at)) / 2_592_000)
+    );
 }
-if (($dto->age_max_months ?? 0) > 0) {
-    $maxYears = intdiv($dto->age_max_months, 12);
-    $maxMonths = $dto->age_max_months % 12;
-}
+
+$minTotal = $dto->age_min_months > 0 ? $dto->age_min_months + $monthsDelta : 0;
+$maxTotal = $dto->age_max_months > 0 ? $dto->age_max_months + $monthsDelta : 0;
+
+$minYears = $minTotal ? intdiv($minTotal, 12) : '';
+$minMonths = $minTotal ? $minTotal % 12 : '';
+$maxYears = $maxTotal ? intdiv($maxTotal, 12) : '';
+$maxMonths = $maxTotal ? $maxTotal % 12 : '';
 
 require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 ?>
@@ -126,7 +132,17 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                             <textarea name="description" rows="3"
                                       class="form-control"><?= htmlspecialchars($dto->description ?? "") ?></textarea>
                         </div>
-
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   id="isAdoptedSwitch"
+                                   name="is_adopted"
+                                <?= $dto->is_adopted ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="isAdoptedSwitch">
+                                Тваринка вже усиновлена
+                            </label>
+                        </div>
                         <?php if ($cover): ?>
                             <div class="mb-3">
                                 <img src="<?= htmlspecialchars($cover) ?>" class="img-fluid rounded">
@@ -170,8 +186,7 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 <script type="module">
     import initAgeRange from '/public/js/age-range-picker.js';
 
-    initAgeRange('minYears', 'minMonths', 'maxYears', 'maxMonths',
-        'age_min_months', 'age_max_months');
+    initAgeRange('minYears', 'minMonths', 'maxYears', 'maxMonths', 'age_min_months', 'age_max_months');
 </script>
 
 <script type="module" src="/public/js/useCustomSelect.js"></script>

@@ -8,9 +8,12 @@ use attributes\routing\Get;
 use attributes\routing\Post;
 use classes\Controller;
 use dto\animals\CreateAnimalRequest;
+use dto\animals\UpdateAnimalRequest;
 use dto\listRequests\AnimalsListRequest;
+use enums\applications\AdoptionStatus;
 use enums\auth\Permission;
 use enums\database\SQLOperator;
+use models\Adoption;
 use models\Animal;
 use models\AnimalTag;
 use models\Species;
@@ -109,10 +112,10 @@ class AnimalsController extends Controller
         $row = Animal::asQuery()
             ->select([
                 'animals.*',
-                's.name   AS species_name'     // ← одразу дістаємо назву виду
+                's.name AS species_name'
             ])
             ->join('species s', 's.id = animals.species_id', "LEFT")
-            ->where('animals.id', \enums\database\SQLOperator::Equal, $id)
+            ->where('animals.id', SQLOperator::Equal, $id)
             ->first();
 
         if (!$row || $row['is_deleted']) {
@@ -122,12 +125,27 @@ class AnimalsController extends Controller
         $tags = AnimalTag::asQuery()
             ->select(['t.id', 't.name'])
             ->join('tags t', 't.id = animal_tags.tag_id')
-            ->where('animal_tags.animal_id', \enums\database\SQLOperator::Equal, $id)
+            ->where('animal_tags.animal_id', SQLOperator::Equal, $id)
             ->fetch();
-
         $row['tags'] = $tags;
 
-        return $this->view(['a' => $row]);
+        $pendingCnt = (int)Adoption::asQuery()
+            ->select(['COUNT(*) AS c'])
+            ->where('animal_id', SQLOperator::Equal, $id)
+            ->where('status', SQLOperator::Equal, AdoptionStatus::Pending->value)
+            ->first()['c'];
+
+        $isAccepted = (bool)Adoption::asQuery()
+            ->select(['id'])
+            ->where('animal_id', SQLOperator::Equal, $id)
+            ->where('status', SQLOperator::Equal, AdoptionStatus::Accepted->value)
+            ->first();
+
+        return $this->view([
+            'a' => $row,
+            'pending_cnt' => $pendingCnt,
+            'accepted_any' => $isAccepted,
+        ]);
     }
 
     #[Authorize(Permission::ManageAnimals)]
@@ -235,7 +253,7 @@ class AnimalsController extends Controller
             ->where('animal_id', SQLOperator::Equal, $id)
             ->fetch();
 
-        $dto = new CreateAnimalRequest();
+        $dto = new UpdateAnimalRequest();
         $dto->name = $row['name'];
         $dto->species_id = $row['species_id'] ?: '';
         $dto->sex = \enums\animals\Sex::tryFrom($row['sex']) ?? \enums\animals\Sex::Unknown;
@@ -243,6 +261,8 @@ class AnimalsController extends Controller
         $dto->age_max_months = $row['age_max_months'] ?: '';
         $dto->description = $row['description'];
         $dto->tag_ids = array_column($tags, 'id');
+        $dto->updated_at = $row['updated_at'];
+        $dto->is_adopted = $row['is_adopted'];
 
         return $this->view([
             'id' => $id,
@@ -255,7 +275,7 @@ class AnimalsController extends Controller
 
     #[Authorize(Permission::ManageAnimals)]
     #[Post('edit')]
-    public function update(int $id, CreateAnimalRequest $dto): array
+    public function update(int $id, UpdateAnimalRequest $dto): array
     {
         $dto->normalize();
 
@@ -293,6 +313,7 @@ class AnimalsController extends Controller
                 'age_min_months' => $dto->age_min_months ?: 0,
                 'age_max_months' => $dto->age_max_months ?: 0,
                 'description' => $dto->description,
+                'is_adopted' => $dto->is_adopted ?: false,
             ];
             if ($newImage) $upd['cover_image_url'] = "/uploads/images/$newImage";
             if ($newVideo) $upd['intro_video_url'] = "/uploads/videos/$newVideo";

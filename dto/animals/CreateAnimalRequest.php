@@ -7,6 +7,8 @@ use enums\animals\Sex;
 
 class CreateAnimalRequest
 {
+    public string $updated_at;
+
     #[Required, MinLength(2)]
     public string $name;
 
@@ -27,7 +29,7 @@ class CreateAnimalRequest
 
     public function normalize(): void
     {
-        foreach (['age_min_months','age_max_months'] as $f) {
+        foreach (['age_min_months', 'age_max_months'] as $f) {
             if ($this->$f === '' || $this->$f === '0') $this->$f = null;
             if (is_string($this->$f)) $this->$f = (int)$this->$f;
         }
