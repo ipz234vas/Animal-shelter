@@ -2,6 +2,7 @@
 /** @var array[] $apps */
 
 use enums\applications\AdoptionStatus;
+use enums\database\SQLOperator;
 
 require_once 'app/helpers/pagination.php';
 require_once 'app/helpers/forms.php';
@@ -31,15 +32,24 @@ function status_badge(AdoptionStatus $st): string
                         <th>Тваринка</th>
                         <th style="width:140px">Статус</th>
                         <th>Коментар</th>
-                        <th style="width:220px" class="text-end">Дії</th>
+                        <th style="width:240px" class="text-end">Дії</th>
                     </tr>
                     </thead>
+
                     <tbody>
                     <?php foreach ($apps as $app): ?>
                         <?php
                         $st = AdoptionStatus::from($app['status']);
                         $isDraft = $st === AdoptionStatus::Draft;
                         $isAccepted = $st === AdoptionStatus::Accepted;
+
+                        $hasReview = false;
+                        if ($isAccepted) {
+                            $hasReview = \models\Review::asQuery()
+                                    ->select(['id'])
+                                    ->where('application_id', SQLOperator::Equal, $app['id'])
+                                    ->first() !== null;
+                        }
                         ?>
                         <tr>
                             <td>#<?= $app['id'] ?></td>
@@ -59,6 +69,7 @@ function status_badge(AdoptionStatus $st): string
 
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1">
+
                                     <?php if ($isDraft): ?>
                                         <a href="/adoptions/edit?id=<?= $app['id'] ?>"
                                            class="btn btn-sm btn-outline-secondary"
@@ -73,6 +84,16 @@ function status_badge(AdoptionStatus $st): string
                                             </button>
                                         </form>
                                     <?php endif; ?>
+
+                                    <?php if ($isAccepted && !$hasReview): ?>
+                                        <!-- залишити відгук -->
+                                        <a href="/reviews/create?application_id=<?= $app['id'] ?>"
+                                           class="btn btn-sm btn-outline-success"
+                                           title="Залишити відгук">
+                                            <i class="bi bi-chat-square-text"></i>
+                                        </a>
+                                    <?php endif; ?>
+
 
                                     <?php if (!$isAccepted): ?>
                                         <button type="button"
