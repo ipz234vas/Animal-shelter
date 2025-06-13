@@ -3,6 +3,9 @@
 namespace models;
 
 namespace models;
+
+use enums\database\SQLOperator;
+
 /**
  * @property int $animal_id
  * @property int $tag_id
@@ -16,7 +19,12 @@ class AnimalTag extends Model
     {
         self::asQuery()->insert([
             'animal_id' => $animalId,
-            'tag_id'    => $tagId
+            'tag_id' => $tagId
         ])->execute();
+    }
+
+    public static function detachAll(int $animalId): void
+    {
+        self::asQuery()->delete()->where("animal_id", SQLOperator::Equal, $animalId)->execute();
     }
 }

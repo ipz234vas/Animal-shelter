@@ -1,19 +1,23 @@
 <?php
+/**
+ * @var int $id
+ * @var dto\animals\CreateAnimalRequest $dto
+ * @var classes\ModelState $state
+ * @var string|null $cover
+ * @var string|null $video
+ */
 
 use enums\animals\Sex;
 
-/**
- * @var dto\animals\CreateAnimalRequest $dto
- * @var classes\ModelState $state
- */
-
-$minTotal = $dto->age_min_months;
-$maxTotal = $dto->age_max_months;
-
-$minYears = ($minTotal ?? 0) > 0 ? intdiv($minTotal, 12) : '';
-$minMonths = ($minTotal ?? 0) > 0 ? $minTotal % 12 : '';
-$maxYears = ($maxTotal ?? 0) > 0 ? intdiv($maxTotal, 12) : '';
-$maxMonths = ($maxTotal ?? 0) > 0 ? $maxTotal % 12 : '';
+$minYears = $minMonths = $maxYears = $maxMonths = '';
+if (($dto->age_min_months ?? 0) > 0) {
+    $minYears = intdiv($dto->age_min_months, 12);
+    $minMonths = $dto->age_min_months % 12;
+}
+if (($dto->age_max_months ?? 0) > 0) {
+    $maxYears = intdiv($dto->age_max_months, 12);
+    $maxMonths = $dto->age_max_months % 12;
+}
 
 require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
 ?>
@@ -22,9 +26,11 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
         <div class="col-lg-7">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    <h2 class="mb-4 text-center">Нова тваринка</h2>
+                    <h2 class="mb-4 text-center">Редагувати тваринку</h2>
 
                     <form method="post" enctype="multipart/form-data" novalidate>
+                        <input type="hidden" name="id" value="<?= $id ?>">
+
                         <div class="mb-3">
                             <label class="form-label">Імʼя</label>
                             <input type="text"
@@ -79,7 +85,6 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                             <label class="form-label">Вік (роки / місяці)</label>
 
                             <div class="row g-2 align-items-center">
-                                <!-- Від -->
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-text">від</span>
@@ -122,38 +127,51 @@ require_once dirname(__DIR__, 2) . '/app/helpers/forms.php';
                                       class="form-control"><?= htmlspecialchars($dto->description ?? "") ?></textarea>
                         </div>
 
+                        <?php if ($cover): ?>
+                            <div class="mb-3">
+                                <img src="<?= htmlspecialchars($cover) ?>" class="img-fluid rounded">
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($video): ?>
+                            <div class="mb-3">
+                                <video src="<?= htmlspecialchars($video) ?>"
+                                       poster="<?= htmlspecialchars($cover) ?>"
+                                       controls style="max-width:100%; max-height: 500px; border-radius:.5rem"></video>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="mb-3">
-                            <label class="form-label">Обкладинка (JPEG/PNG ≤ 5 МБ)</label>
-                            <input type="file"
-                                   name="cover_image"
+                            <label class="form-label">Нова обкладинка (JPEG/PNG ≤5 МБ)&nbsp;
+                                <small class="text-muted">(залиште порожнім, щоб не змінювати)</small></label>
+                            <input type="file" name="cover_image"
                                    class="form-control<?= $state->first('cover_image') ? ' is-invalid' : '' ?>"
-                                   accept="image/jpeg,image/png" required>
+                                   accept="image/jpeg,image/png">
                             <?= form_error($state->all(), 'cover_image') ?>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Відео (MP4/WEBM ≤ 16 МБ)</label>
-                            <input type="file"
-                                   name="intro_video"
+                            <label class="form-label">Нове відео (MP4/WEBM ≤16 МБ)&nbsp;
+                                <small class="text-muted">(необов’язково)</small></label>
+                            <input type="file" name="intro_video"
                                    class="form-control<?= $state->first('intro_video') ? ' is-invalid' : '' ?>"
                                    accept="video/mp4,video/webm">
                             <?= form_error($state->all(), 'intro_video') ?>
                         </div>
 
-                        <button class="btn btn-primary w-100">Зберегти</button>
+                        <button class="btn btn-primary w-100">Оновити дані</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script type="module">
     import initAgeRange from '/public/js/age-range-picker.js';
 
-    initAgeRange(
-        'minYears', 'minMonths',
-        'maxYears', 'maxMonths',
-        'age_min_months', 'age_max_months'
-    );
+    initAgeRange('minYears', 'minMonths', 'maxYears', 'maxMonths',
+        'age_min_months', 'age_max_months');
 </script>
-<script type="module" src="../../public/js/useCustomSelect.js"></script>
+
+<script type="module" src="/public/js/useCustomSelect.js"></script>

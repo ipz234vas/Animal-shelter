@@ -19,7 +19,7 @@ class Range extends ValidationRule
 
     public function validate(mixed $value): ?string
     {
-        $isOutOfRange = $value !== null && ($value < $this->min || $value > $this->max);
+        $isOutOfRange = is_numeric($value) && ($value < $this->min || $value > $this->max);
 
         return $isOutOfRange ? $this->message : null;
     }

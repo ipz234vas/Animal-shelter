@@ -17,11 +17,19 @@ class CreateAnimalRequest
     public Sex $sex = Sex::Unknown;
 
     #[Range(0, 600, "Значення не може перевищувати 50 років")]
-    public ?int $age_min_months = null;
+    public int|string|null $age_min_months = null;
     #[Range(0, 600, "Значення не може перевищувати 50 років")]
-    public ?int $age_max_months = null;
+    public int|string|null $age_max_months = null;
 
     public ?string $description = null;
 
     public array $tag_ids = [];
+
+    public function normalize(): void
+    {
+        foreach (['age_min_months','age_max_months'] as $f) {
+            if ($this->$f === '' || $this->$f === '0') $this->$f = null;
+            if (is_string($this->$f)) $this->$f = (int)$this->$f;
+        }
+    }
 }

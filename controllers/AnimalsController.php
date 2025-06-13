@@ -106,7 +106,6 @@ class AnimalsController extends Controller
     #[Get('show')]
     public function show(int $id): array
     {
-        /* ---- 1. тваринка + назва виду ----------------------------------- */
         $row = Animal::asQuery()
             ->select([
                 'animals.*',
@@ -145,6 +144,7 @@ class AnimalsController extends Controller
     #[Post('create')]
     public function store(CreateAnimalRequest $dto): array
     {
+        $dto->normalize();
         $imgName = FileValidator::saveImage($_FILES['cover_image'] ?? null, $this->modelState);
         if (!$imgName) {
             $this->modelState->add('cover_image', 'Зображення обовʼязкове.');
@@ -219,5 +219,103 @@ class AnimalsController extends Controller
 
         $back = $next ? base64_decode($next) : '/animals';
         $this->redirectToPath($back);
+    }
+
+    #[Authorize(Permission::ManageAnimals)]
+    #[Get('edit')]
+    public function edit(int $id): array
+    {
+        $row = Animal::getById($id);
+        if (!$row || $row['is_deleted']) {
+            throw new \classes\exceptions\HttpException(404);
+        }
+
+        $tags = AnimalTag::asQuery()
+            ->select(['tag_id AS id'])
+            ->where('animal_id', SQLOperator::Equal, $id)
+            ->fetch();
+
+        $dto = new CreateAnimalRequest();
+        $dto->name = $row['name'];
+        $dto->species_id = $row['species_id'] ?: '';
+        $dto->sex = \enums\animals\Sex::tryFrom($row['sex']) ?? \enums\animals\Sex::Unknown;
+        $dto->age_min_months = $row['age_min_months'] ?: '';
+        $dto->age_max_months = $row['age_max_months'] ?: '';
+        $dto->description = $row['description'];
+        $dto->tag_ids = array_column($tags, 'id');
+
+        return $this->view([
+            'id' => $id,
+            'dto' => $dto,
+            'state' => $this->modelState,
+            'cover' => $row['cover_image_url'],
+            'video' => $row['intro_video_url'],
+        ]);
+    }
+
+    #[Authorize(Permission::ManageAnimals)]
+    #[Post('edit')]
+    public function update(int $id, CreateAnimalRequest $dto): array
+    {
+        $dto->normalize();
+
+        $animal = Animal::getById($id);
+        if (!$animal || $animal['is_deleted']) {
+            throw new \classes\exceptions\HttpException(404);
+        }
+
+        $newImage = FileValidator::saveImage($_FILES['cover_image'] ?? null, $this->modelState);
+        $newVideo = FileValidator::saveVideo($_FILES['intro_video'] ?? null, $this->modelState);
+
+        if ($dto->age_min_months !== null && $dto->age_max_months !== null
+            && $dto->age_max_months < $dto->age_min_months) {
+            $this->modelState->add('age_max_months',
+                'Максимальний вік не може бути меншим за мінімальний.');
+        }
+
+        if (!$this->modelState->isValid()) {
+            return $this->view([
+                'id' => $id,
+                'dto' => $dto,
+                'state' => $this->modelState,
+                'cover' => $animal['cover_image_url'],
+                'video' => $animal['intro_video_url'],
+            ]);
+        }
+
+        $db = \classes\Core::getInstance()->db;
+        $db->pdo->beginTransaction();
+        try {
+            $upd = [
+                'name' => $dto->name,
+                'species_id' => $dto->species_id ?: null,
+                'sex' => $dto->sex->value,
+                'age_min_months' => $dto->age_min_months ?: 0,
+                'age_max_months' => $dto->age_max_months ?: 0,
+                'description' => $dto->description,
+            ];
+            if ($newImage) $upd['cover_image_url'] = "/uploads/images/$newImage";
+            if ($newVideo) $upd['intro_video_url'] = "/uploads/videos/$newVideo";
+
+            Animal::asQuery()->update($upd)
+                ->where('id', SQLOperator::Equal, $id)
+                ->execute();
+
+            if ($newImage) @unlink($_SERVER['DOCUMENT_ROOT'] . $animal['cover_image_url']);
+            if ($newVideo && $animal['intro_video_url'])
+                @unlink($_SERVER['DOCUMENT_ROOT'] . $animal['intro_video_url']);
+
+            AnimalTag::detachAll($id);
+            foreach ($dto->tag_ids as $tid) {
+                AnimalTag::attach($id, $tid);
+            }
+
+            $db->pdo->commit();
+        } catch (\Throwable $e) {
+            $db->pdo->rollBack();
+            throw $e;
+        }
+
+        $this->redirect('animals', 'index');
     }
 }
