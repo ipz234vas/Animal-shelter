@@ -1,0 +1,528 @@
+{
+  "info": {
+    "_postman_id": "99d414bf-c46f-446d-ac1e-c122094a126b",
+    "name": "Animal Shelter API",
+    "description": "API колекція для офіційного сайту притулку для тварин.\n\nЦя колекція демонструє роботу з довідником видів тварин (`Species`). Вона включає отримання списку з пагінацією та створення нового виду із перевіркою валідації.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41723412"
+  },
+  "item": [
+    {
+      "name": "Species",
+      "item": [
+        {
+          "name": "Get all species (Index)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/species",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "species"
+              ]
+            },
+            "description": "Отримання списку всіх видів тварин. Метод підтримує пагінацію через параметри `page` та `per_page`."
+          },
+          "response": [
+            {
+              "name": "Success (200 OK)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/species",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "species"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Номер сторінки для пагінації (за замовчуванням 1)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "20",
+                      "description": "Кількість записів на сторінку",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 17 May 2026 21:29:07 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Apache/2.4.62 (Win64) PHP/8.3.14 mod_fcgid/2.3.10-dev"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "PHP/8.3.14"
+                },
+                {
+                  "key": "Expires",
+                  "value": "Thu, 19 Nov 1981 08:52:00 GMT"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store, no-cache, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "117"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5, max=100"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": 2,\n            \"name\": \"кіт\"\n        },\n        {\n            \"id\": 1,\n            \"name\": \"пес\"\n        }\n    ],\n    \"meta\": {\n        \"total\": 2,\n        \"page\": 1,\n        \"per_page\": 20\n    }\n}"
+            },
+            {
+              "name": "Success with pagination(200 OK)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/species?page=1&per_page=1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "species"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Номер сторінки для пагінації (за замовчуванням 1)"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "1",
+                      "description": "Кількість записів на сторінку"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 17 May 2026 21:30:30 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Apache/2.4.62 (Win64) PHP/8.3.14 mod_fcgid/2.3.10-dev"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "PHP/8.3.14"
+                },
+                {
+                  "key": "Expires",
+                  "value": "Thu, 19 Nov 1981 08:52:00 GMT"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store, no-cache, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "91"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5, max=100"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": 2,\n            \"name\": \"кіт\"\n        }\n    ],\n    \"meta\": {\n        \"total\": 2,\n        \"page\": 1,\n        \"per_page\": 1\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create new species",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/species/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "species",
+                "create"
+              ]
+            },
+            "description": "Створення нового виду тварини. Включає перевірку на унікальність назви (якщо такий вид вже є, повертається 422 Unprocessable Entity).\n\n**Обов'язкові поля:**\n- `name` (string) - Назва виду."
+          },
+          "response": [
+            {
+              "name": "Success Created (201)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Птах\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/species/create",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "species",
+                    "create"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 17 May 2026 21:31:23 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Apache/2.4.62 (Win64) PHP/8.3.14 mod_fcgid/2.3.10-dev"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "PHP/8.3.14"
+                },
+                {
+                  "key": "Expires",
+                  "value": "Thu, 19 Nov 1981 08:52:00 GMT"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store, no-cache, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "35"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5, max=100"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": 8,\n    \"meta\": []\n}"
+            },
+            {
+              "name": "Validation Error - Already Exist(422)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Птах\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/species/create",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "species",
+                    "create"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 17 May 2026 21:32:16 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Apache/2.4.62 (Win64) PHP/8.3.14 mod_fcgid/2.3.10-dev"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "PHP/8.3.14"
+                },
+                {
+                  "key": "Expires",
+                  "value": "Thu, 19 Nov 1981 08:52:00 GMT"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store, no-cache, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "76"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5, max=100"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"errors\": {\n        \"name\": [\n            \"Такий вид уже існує.\"\n        ]\n    }\n}"
+            },
+            {
+              "name": "Validation Error - Empty body(422)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/species/create",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "species",
+                    "create"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 17 May 2026 21:32:50 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "Apache/2.4.62 (Win64) PHP/8.3.14 mod_fcgid/2.3.10-dev"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "PHP/8.3.14"
+                },
+                {
+                  "key": "Expires",
+                  "value": "Thu, 19 Nov 1981 08:52:00 GMT"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-store, no-cache, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "118"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5, max=100"
+                },
+                {
+                  "key": "Connection",
+                  "value": "Keep-Alive"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"errors\": {\n        \"name\": [\n            \"Це поле є обов'язковим!\",\n            \"Мінімум 2 символів.\"\n        ]\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Ендпоінти для керування видами тварин."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://animal-shelter.local"
+    }
+  ]
+}
