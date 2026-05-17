@@ -141,6 +141,7 @@ class ReviewsController extends Controller
         return $this->view(['reviews' => $rows]);
     }
 
+    #[Authorize]
     #[Get('index')]
     public function myIndex(): array
     {
@@ -215,7 +216,7 @@ class ReviewsController extends Controller
     #[Post('delete')]
     public function adminDelete(int $id): never
     {
-        Review::deleteById($id);        // images ~CASCADE
+        Review::deleteById($id);
         $this->redirect('reviews', 'manage');
     }
 }

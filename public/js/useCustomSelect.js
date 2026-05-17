@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (!multi && currentId) {              // SINGLE
+        if (!multi && currentId) {
             api(`/get?id=${currentId}`)
                 .then(({id, name}) => {
                     ts.addOption({id, name});
